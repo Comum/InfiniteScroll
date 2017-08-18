@@ -1,0 +1,73 @@
+html, body {
+	width: 100%;
+	height: 100%;
+
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: center;
+}
+
+.mainDiv {
+	width: 100%;
+	max-width: 1000px;
+	height: 100%;
+}
+
+.header {
+	width: 100%;
+	height: 100px;
+
+	flex-shrink: 0;
+
+	margin: 16px 0px;
+
+	border: 1px solid pink;
+
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+.pagesSpacer {
+	width: 100%;
+	height: 0px;
+}
+
+.pagesContainer {
+	width: 100%;
+	height: 100%;
+}
+
+.pageSingle {
+	width: 100%;
+	height: 120vh;
+
+	border: 1px solid blue;
+}
+
+.scrollTracker {
+	width: 175px;
+	height: 50px;
+
+	border: 1px solid black;
+
+	background-color: beige;
+
+	position: fixed;
+	top: 120px;
+	right: 100px;
+}
+
+.scrollTracker > p {
+	margin: 0;
+	padding: 0;
+
+	margin: 4px;
+}
