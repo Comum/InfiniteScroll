@@ -41,23 +41,24 @@ function loadNextPage() {
 	}
 }
 
-function loadPrevPage() {
-	if (pagesViewport > prevPageTriggerHeight) {
+function loadPrevPage() { // console.log('aqui');
+	if (pagesViewport < prevPageTriggerHeight) {
 		console.info('load prev page');
+		// deletedPages--;
 	}
 }
 
 function removePage(position) {
 	if (position === 'first') {
-		// .shift()
+		
 		$pages.splice(0,1);
-		// $pagesContainer.find('.pageSingle').splice(0,1);
 		$('.pageSingle:first-child').remove();
 		deletedPages++;
 		$pagesSpacer.height(deletedPages * pageHeight);
 	} else if (position === 'last') {
 		// $pages.pop();
 		$pages.splice($pages.length-1,1);
+		$('.pageSingle:last-child').remove();
 	}
 }
 
@@ -66,10 +67,14 @@ function currentPageControl(direction) {
 		if (pagesViewport > pagesCurrentHeight) {
 			currentPage++;
 		}
+	} else if (direction === 'up') {
+		if ((pagesViewport < pagesCurrentHeight - pageHeight) && (currentPage > 1)){
+			currentPage--;
+		}
 	}
 }
 
-function onScroll() {
+function onScroll() { console.log(currentPage);
 	scrollValue = $document.scrollTop();
 
 	pagesViewport = screenHeight - pagePlaceholder;
@@ -80,7 +85,7 @@ function onScroll() {
 	nextPageTriggerHeight = pagesObjHeight - pageHeight / 2;
 
 	// screen half way through first visible page
-	prevPageTriggerHeight = (pageCount - maxPageNumber) * pageHeight - pagesObjHeight / 2;
+	prevPageTriggerHeight = $pagesSpacer.height() + pageHeight * 1.5;
 
 	// check if the screen is at half size
 	if ((pagesViewport > (pageHeight / 2)) && (firstRun)) {
@@ -92,7 +97,7 @@ function onScroll() {
 	if (prevScroll > scrollValue) { // scroll up
 		scrollAmount.up = scrollValue;
 
-		pagesViewport = pagesViewport - scrollValue;
+		pagesViewport = pagesViewport + scrollValue;
 
 		currentPageControl('up');
 		console.info('prevPageTriggerHeight', prevPageTriggerHeight);
