@@ -24,16 +24,20 @@ var deletedPages = 0;
 
 var scrollAmount = {up: 0, down: 0};
 
-function loadPage() {
+function loadPage(position) {
 	html = '<div class="pageSingle">' + pageCount + '</div>';
-	$pagesContainer.append(html);
+	if (position === 'ini') {
+		$pagesContainer.prepend(html);
+	} else if (position === 'end') {
+		$pagesContainer.append(html);
+	}
 	$pages = $('.pageSingle');
 }
 
 function loadNextPage() {
 	if (pagesViewport > nextPageTriggerHeight) {
 		pageCount++;
-		loadPage();
+		loadPage('end');
 	}
 }
 
@@ -81,7 +85,7 @@ function onScroll() {
 	// check if the screen is at half size
 	if ((pagesViewport > (pageHeight / 2)) && (firstRun)) {
 		pageCount++;
-		loadPage();
+		loadPage('end');
 		firstRun = false;
 	}
 
