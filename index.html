@@ -12,13 +12,19 @@
 		<div class="mainDiv">
 			<div class="header">Title</div>
 			<div class="pagesSpacer"></div>
-			<div class="pagesContainer">
+			<div class="pagesContainer"
+				 data-start-page="1"
+				 data-max-pages="3">
 				<div class="pageSingle">1</div>
 			</div>
 		</div>
 		<div class="scrollTracker">
 			<p>Scrolled Down: <span class="scrollDownValue"></span></p>
 			<p>Scrolled Up: <span class="scrollUpValue"></span></p>
+			<br>
+			<p>Page Count: <span class="pageCountValue"></span></p>
+			<p>Current Page: <span class="currentPageValue"></span></p>
+			<p>Deleted Pages: <span class="deletedPageValue"></span></p>
 		</div>
 
 		<script src="scripts.js"></script>
