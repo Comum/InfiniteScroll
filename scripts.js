@@ -73,7 +73,7 @@ function currentPageControl(direction) {
 			currentPage++;
 		}
 	} else if (direction === 'up') {
-		if ((pagesViewport < pagesCurrentHeight - (pageHeight * 1.5)) && (currentPage > 1)){
+		if ((pagesViewport < (pagesCurrentHeight - pageHeight * 0.5)) && (currentPage > 1)) {
 			currentPage--;
 		}
 	}
