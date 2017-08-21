@@ -24,8 +24,8 @@ var deletedPages = 0;
 
 var scrollAmount = {up: 0, down: 0};
 
-function loadPage(position) {
-	html = '<div class="pageSingle">' + pageCount + '</div>';
+function loadPage(position, printPageNumber) {
+	html = '<div class="pageSingle">' + printPageNumber + '</div>';
 	if (position === 'ini') {
 		$pagesContainer.prepend(html);
 	} else if (position === 'end') {
@@ -37,14 +37,18 @@ function loadPage(position) {
 function loadNextPage() {
 	if (pagesViewport > nextPageTriggerHeight) {
 		pageCount++;
-		loadPage('end');
+		loadPage('end', pageCount);
 	}
 }
 
 function loadPrevPage() { // console.log('aqui');
-	if (pagesViewport < prevPageTriggerHeight) {
+	if ((pagesViewport < prevPageTriggerHeight) && (deletedPages > 0)) {
+	// if (pagesViewport < prevPageTriggerHeight){
 		console.info('load prev page');
-		// deletedPages--;
+		loadPage('ini', (currentPage - 1));
+		deletedPages--;
+		$('.deletedPageValue').text(deletedPages);
+		$pagesSpacer.height(deletedPages * pageHeight);
 	}
 }
 
@@ -54,6 +58,7 @@ function removePage(position) {
 		$pages.splice(0,1);
 		$('.pageSingle:first-child').remove();
 		deletedPages++;
+		$('.deletedPageValue').text(deletedPages);
 		$pagesSpacer.height(deletedPages * pageHeight);
 	} else if (position === 'last') {
 		// $pages.pop();
@@ -68,10 +73,12 @@ function currentPageControl(direction) {
 			currentPage++;
 		}
 	} else if (direction === 'up') {
-		if ((pagesViewport < pagesCurrentHeight - pageHeight) && (currentPage > 1)){
+		if ((pagesViewport < pagesCurrentHeight - (pageHeight * 1.5)) && (currentPage > 1)){
 			currentPage--;
 		}
 	}
+
+	$('.currentPageValue').text(currentPage);
 }
 
 function onScroll() { console.log(currentPage);
@@ -90,7 +97,7 @@ function onScroll() { console.log(currentPage);
 	// check if the screen is at half size
 	if ((pagesViewport > (pageHeight / 2)) && (firstRun)) {
 		pageCount++;
-		loadPage('end');
+		loadPage('end', pageCount);
 		firstRun = false;
 	}
 
@@ -100,7 +107,6 @@ function onScroll() { console.log(currentPage);
 		pagesViewport = pagesViewport + scrollValue;
 
 		currentPageControl('up');
-		console.info('prevPageTriggerHeight', prevPageTriggerHeight);
 		loadPrevPage();
 
 		if ($pages.length > maxPageNumber) {
@@ -127,4 +133,5 @@ function onScroll() { console.log(currentPage);
 }
 
 onScroll();
-$(window).on('scroll', _.debounce(onScroll, 50));
+// $(window).on('scroll', _.debounce(onScroll, 50));
+$(window).on('scroll', onScroll);
