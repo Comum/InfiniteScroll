@@ -154,6 +154,8 @@ $(function () {
 						currentPage = arg.split('=')[1];
 					}
 				});
+
+			// load previous page and populate pagesSpacer height and scroll to page
 		}
 	}
 
