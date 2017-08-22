@@ -14,7 +14,7 @@ $(function () {
 	var screenHeight = $window.height();
 	var pagePlaceholder = $header.height();
 	var scrollValue;
-	var prevScroll;
+	var prevScroll = 0;
 	var firstRun = true;
 	var pagesViewport;
 	var pagesObjHeight;
@@ -86,28 +86,7 @@ $(function () {
 		$('.currentPageValue').text(currentPage);
 	}
 
-	function onScroll() { console.log(currentPage);
-		scrollValue = $document.scrollTop();
-
-		pagesViewport = screenHeight - pagePlaceholder;
-		pagesObjHeight = pageHeight * pageCount;
-		// pagesObjHeight = pageHeight * currentPage;
-		pagesCurrentHeight = pageHeight * currentPage;
-
-		// screen half way through last visible page
-		nextPageTriggerHeight = pagesObjHeight - pageHeight / 2;
-
-		// screen half way through first visible page
-		prevPageTriggerHeight = $pagesSpacer.height() + pageHeight * 1.5;
-
-		// check if the screen is at half size
-		if ((pagesViewport > (pageHeight / 2)) && (firstRun)) {
-			pageCount++;
-			$('.pageCountValue').text(pageCount);
-			loadPage('end', pageCount);
-			firstRun = false;
-		}
-
+	function scrollingOptions() {
 		if (prevScroll > scrollValue) { // scroll up
 			scrollAmount.up = scrollValue;
 
@@ -131,6 +110,30 @@ $(function () {
 				removePage('first');
 			}
 		}
+	}
+
+	function onScroll() {
+		scrollValue = $document.scrollTop();
+
+		pagesViewport = screenHeight - pagePlaceholder;
+		pagesObjHeight = pageHeight * pageCount;
+		pagesCurrentHeight = pageHeight * currentPage;
+
+		// screen half way through last visible page
+		nextPageTriggerHeight = pagesObjHeight - pageHeight / 2;
+
+		// screen half way through first visible page
+		prevPageTriggerHeight = $pagesSpacer.height() + pageHeight * 1.5;
+
+		// check if the screen is at half size
+		if ((pagesViewport > (pageHeight / 2)) && (firstRun)) {
+			pageCount++;
+			$('.pageCountValue').text(pageCount);
+			loadPage('end', pageCount);
+			firstRun = false;
+		}
+
+		scrollingOptions();
 
 		// for visual aid (do not include)
 		$('.scrollDownValue').text(scrollAmount.down);
