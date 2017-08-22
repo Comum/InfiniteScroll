@@ -9,8 +9,8 @@ $(function () {
 	var html;
 	var maxPageNumber = $pagesContainer.data('maxPages');
 	var currentPage;
-	var pageCount = 1;
-	var pageHeight = $pages.height();
+	var pageCount = 0;
+	var pageHeight;
 	var screenHeight = $window.height();
 	var pagePlaceholder = $header.height();
 	var scrollValue;
@@ -44,10 +44,8 @@ $(function () {
 		}
 	}
 
-	function loadPrevPage() { // console.log('aqui');
+	function loadPrevPage() {
 		if ((pagesViewport < prevPageTriggerHeight) && (deletedPages > 0)) {
-		// if (pagesViewport < prevPageTriggerHeight){
-			console.info('load prev page');
 			loadPage('ini', (currentPage - 1));
 			deletedPages--;
 			$('.deletedPageValue').text(deletedPages);
@@ -112,9 +110,10 @@ $(function () {
 		}
 	}
 
-	function onScroll() {
-		scrollValue = $document.scrollTop();
-
+	function updateValues() {
+		if (!pageHeight) {
+			pageHeight = $pages.height();
+		}
 		pagesViewport = screenHeight - pagePlaceholder;
 		pagesObjHeight = pageHeight * pageCount;
 		pagesCurrentHeight = pageHeight * currentPage;
@@ -124,13 +123,25 @@ $(function () {
 
 		// screen half way through first visible page
 		prevPageTriggerHeight = $pagesSpacer.height() + pageHeight * 1.5;
+	}
+
+	function onScroll() {
+		scrollValue = $document.scrollTop();
 
 		// check if the screen is at half size
-		if ((pagesViewport > (pageHeight / 2)) && (firstRun)) {
+		if (firstRun) {
 			pageCount++;
-			$('.pageCountValue').text(pageCount);
 			loadPage('end', pageCount);
 			firstRun = false;
+			updateValues();
+
+			if (pagesViewport > (pageHeight / 2)) {
+				pageCount++;
+				$('.pageCountValue').text(pageCount);
+				loadPage('end', pageCount);
+			}
+		} else {
+			updateValues();
 		}
 
 		scrollingOptions();
@@ -159,6 +170,9 @@ $(function () {
 				});
 
 			// load previous page and populate pagesSpacer height and scroll to page
+
+			// don't load the first page normally
+			firstRun = false;
 		}
 	}
 
