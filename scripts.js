@@ -96,7 +96,7 @@ $(function () {
 			if ($pages.length > maxPageNumber) {
 				removePage('last');
 			}
-		} else if (prevScroll < scrollValue) { // scroll down
+		} else if ((prevScroll < scrollValue) && (prevScroll !== 0)){ // scroll down
 			scrollAmount.down = scrollValue;
 
 			pagesViewport = pagesViewport + scrollValue;
@@ -142,9 +142,8 @@ $(function () {
 			}
 		} else {
 			updateValues();
+			scrollingOptions();
 		}
-
-		scrollingOptions();
 
 		// for visual aid (do not include)
 		$('.scrollDownValue').text(scrollAmount.down);
@@ -165,7 +164,7 @@ $(function () {
 				.split('&')
 				.forEach(function (arg) {
 					if (arg.indexOf(startPage) !== -1) {
-						currentPage = arg.split('=')[1];
+						currentPage = parseInt(arg.split('=')[1], 10);
 					}
 				});
 
@@ -173,6 +172,19 @@ $(function () {
 
 			// don't load the first page normally
 			firstRun = false;
+
+			loadPage('end', (currentPage - 1));
+			loadPage('end', currentPage);
+			
+			pageHeight = $pages.height();
+			
+			$pagesSpacer.height(currentPage * pageHeight);
+			
+			$('html, body').animate({
+				scrollTop: ($pagesContainer.offset().top + pageHeight)
+			}, 0);
+
+			pageCount = currentPage;
 		}
 	}
 
