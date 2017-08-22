@@ -23,6 +23,7 @@ $(function () {
 	var pagesCurrentHeight;
 	var deletedPages = 0;
 	var startPage = 'startPage';
+	var urlStartUp = false;
 
 	var scrollAmount = {up: 0, down: 0};
 
@@ -75,8 +76,14 @@ $(function () {
 				currentPage++;
 			}
 		} else if (direction === 'up') {
-			if ((pagesViewport < (pagesCurrentHeight - pageHeight * 0.5)) && (currentPage > 1)) {
-				currentPage--;
+			if (urlStartUp) {
+				if ((pagesViewport < prevPageTriggerHeight) && (currentPage > 1)) {
+					currentPage--;
+				}
+			} else {
+				if ((pagesViewport < (pagesCurrentHeight - pageHeight * 0.5)) && (currentPage > 1)) {
+					currentPage--;
+				}
 			}
 		}
 
@@ -159,6 +166,8 @@ $(function () {
 		if (arr.length === 1) {
 			currentPage = $pagesContainer.data('startPage');
 		} else {
+			urlStartUp = true;
+
 			arr[1]
 				.split('&')
 				.forEach(function (arg) {
