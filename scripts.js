@@ -9,12 +9,12 @@ $(function () {
 	var html;
 	var maxPageNumber = $pagesContainer.data('maxPages');
 	var currentPage;
-	var pageCount = 1;
-	var pageHeight = $pages.height();
+	var pageCount = 0;
+	var pageHeight;
 	var screenHeight = $window.height();
 	var pagePlaceholder = $header.height();
 	var scrollValue;
-	var prevScroll;
+	var prevScroll = 0;
 	var firstRun = true;
 	var pagesViewport;
 	var pagesObjHeight;
@@ -23,6 +23,7 @@ $(function () {
 	var pagesCurrentHeight;
 	var deletedPages = 0;
 	var startPage = 'startPage';
+	var urlStartUp = false;
 
 	var scrollAmount = {up: 0, down: 0};
 
@@ -44,10 +45,8 @@ $(function () {
 		}
 	}
 
-	function loadPrevPage() { // console.log('aqui');
+	function loadPrevPage() {
 		if ((pagesViewport < prevPageTriggerHeight) && (deletedPages > 0)) {
-		// if (pagesViewport < prevPageTriggerHeight){
-			console.info('load prev page');
 			loadPage('ini', (currentPage - 1));
 			deletedPages--;
 			$('.deletedPageValue').text(deletedPages);
@@ -64,8 +63,7 @@ $(function () {
 			$('.deletedPageValue').text(deletedPages);
 			$pagesSpacer.height(deletedPages * pageHeight);
 		} else if (position === 'last') {
-			// $pages.pop();
-			$pages.splice($pages.length-1,1);
+			$pages.splice($pages.lengths-1,1);
 			$('.pageSingle:last-child').remove();
 			pageCount--;
 			$('.pageCountValue').text(pageCount);
@@ -78,36 +76,21 @@ $(function () {
 				currentPage++;
 			}
 		} else if (direction === 'up') {
-			if ((pagesViewport < (pagesCurrentHeight - pageHeight * 0.5)) && (currentPage > 1)) {
-				currentPage--;
+			if (urlStartUp) {
+				if ((pagesViewport < prevPageTriggerHeight) && (currentPage > 1)) {
+					currentPage--;
+				}
+			} else {
+				if ((pagesViewport < (pagesCurrentHeight - pageHeight * 0.5)) && (currentPage > 1)) {
+					currentPage--;
+				}
 			}
 		}
 
 		$('.currentPageValue').text(currentPage);
 	}
 
-	function onScroll() { console.log(currentPage);
-		scrollValue = $document.scrollTop();
-
-		pagesViewport = screenHeight - pagePlaceholder;
-		pagesObjHeight = pageHeight * pageCount;
-		// pagesObjHeight = pageHeight * currentPage;
-		pagesCurrentHeight = pageHeight * currentPage;
-
-		// screen half way through last visible page
-		nextPageTriggerHeight = pagesObjHeight - pageHeight / 2;
-
-		// screen half way through first visible page
-		prevPageTriggerHeight = $pagesSpacer.height() + pageHeight * 1.5;
-
-		// check if the screen is at half size
-		if ((pagesViewport > (pageHeight / 2)) && (firstRun)) {
-			pageCount++;
-			$('.pageCountValue').text(pageCount);
-			loadPage('end', pageCount);
-			firstRun = false;
-		}
-
+	function scrollingOptions() {
 		if (prevScroll > scrollValue) { // scroll up
 			scrollAmount.up = scrollValue;
 
@@ -119,7 +102,7 @@ $(function () {
 			if ($pages.length > maxPageNumber) {
 				removePage('last');
 			}
-		} else if (prevScroll < scrollValue) { // scroll down
+		} else if ((prevScroll < scrollValue) && (prevScroll !== 0)){ // scroll down
 			scrollAmount.down = scrollValue;
 
 			pagesViewport = pagesViewport + scrollValue;
@@ -130,6 +113,42 @@ $(function () {
 			if ($pages.length > maxPageNumber) {
 				removePage('first');
 			}
+		}
+	}
+
+	function updateValues() {
+		if (!pageHeight) {
+			pageHeight = $pages.height();
+		}
+		pagesViewport = screenHeight - pagePlaceholder;
+		pagesObjHeight = pageHeight * pageCount;
+		pagesCurrentHeight = pageHeight * currentPage;
+
+		// screen half way through last visible page
+		nextPageTriggerHeight = pagesObjHeight - pageHeight / 2;
+
+		// screen half way through first visible page
+		prevPageTriggerHeight = $pagesSpacer.height() + pageHeight * 1.5;
+	}
+
+	function onScroll() {
+		scrollValue = $document.scrollTop();
+
+		// check if the screen is at half size
+		if (firstRun) {
+			pageCount++;
+			loadPage('end', pageCount);
+			firstRun = false;
+			updateValues();
+
+			if (pagesViewport > (pageHeight / 2)) {
+				pageCount++;
+				$('.pageCountValue').text(pageCount);
+				loadPage('end', pageCount);
+			}
+		} else {
+			updateValues();
+			scrollingOptions();
 		}
 
 		// for visual aid (do not include)
@@ -147,15 +166,45 @@ $(function () {
 		if (arr.length === 1) {
 			currentPage = $pagesContainer.data('startPage');
 		} else {
+			urlStartUp = true;
+
 			arr[1]
 				.split('&')
 				.forEach(function (arg) {
 					if (arg.indexOf(startPage) !== -1) {
-						currentPage = arg.split('=')[1];
+						currentPage = parseInt(arg.split('=')[1], 10);
 					}
 				});
 
 			// load previous page and populate pagesSpacer height and scroll to page
+
+			// don't load the first page normally
+			firstRun = false;
+			
+
+			if (currentPage > 1) {
+				loadPage('end', (currentPage - 1));
+			}
+			loadPage('end', currentPage);
+			pageHeight = $pages.height();
+
+			if (currentPage > 1) {
+				$pagesSpacer.height((currentPage - 1) * pageHeight);
+			}
+			
+			$('html, body').animate({
+				scrollTop: ($pagesContainer.offset().top + pageHeight)
+			}, 0);
+
+			pageCount = currentPage;
+			if (currentPage > 2) {
+				deletedPages = currentPage - 2;
+			}
+
+			// auxiliarty info
+			$('.deletedPageValue').text(deletedPages);
+			$('.pageCountValue').text(pageCount);
+			$('.currentPageValue').text(currentPage);
 		}
 	}
 
