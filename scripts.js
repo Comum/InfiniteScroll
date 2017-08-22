@@ -62,8 +62,7 @@ $(function () {
 			$('.deletedPageValue').text(deletedPages);
 			$pagesSpacer.height(deletedPages * pageHeight);
 		} else if (position === 'last') {
-			// $pages.pop();
-			$pages.splice($pages.length-1,1);
+			$pages.splice($pages.lengths-1,1);
 			$('.pageSingle:last-child').remove();
 			pageCount--;
 			$('.pageCountValue').text(pageCount);
@@ -172,19 +171,31 @@ $(function () {
 
 			// don't load the first page normally
 			firstRun = false;
+			
 
-			loadPage('end', (currentPage - 1));
+			if (currentPage > 1) {
+				loadPage('end', (currentPage - 1));
+			}
 			loadPage('end', currentPage);
-			
 			pageHeight = $pages.height();
-			
-			$pagesSpacer.height(currentPage * pageHeight);
+
+			if (currentPage > 1) {
+				$pagesSpacer.height((currentPage - 1) * pageHeight);
+			}
 			
 			$('html, body').animate({
 				scrollTop: ($pagesContainer.offset().top + pageHeight)
 			}, 0);
 
 			pageCount = currentPage;
+			if (currentPage > 2) {
+				deletedPages = currentPage - 2;
+			}
+
+			// auxiliarty info
+			$('.deletedPageValue').text(deletedPages);
+			$('.pageCountValue').text(pageCount);
+			$('.currentPageValue').text(currentPage);
 		}
 	}
 
