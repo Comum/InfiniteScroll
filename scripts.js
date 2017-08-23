@@ -77,8 +77,10 @@ $(function () {
 			}
 		} else if (direction === 'up') {
 			if (urlStartUp) {
+				// first load when the url is used
 				if ((pagesViewport < prevPageTriggerHeight) && (currentPage > 1)) {
 					currentPage--;
+					urlStartUp = false;
 				}
 			} else {
 				if ((pagesViewport < (pagesCurrentHeight - pageHeight * 0.5)) && (currentPage > 1)) {
