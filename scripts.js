@@ -295,6 +295,13 @@
 			this.deletedPages = 0;
 			this.prevScroll = 0;
 			this.firstRun = true;
+			this.pagesViewport = 0;
+			this.pagesObjHeight = 0;
+			this.pagesCurrentHeight = 0;
+			this.nextPageTriggerHeight = 0;
+
+			// screen half way through first visible page
+			this.prevPageTriggerHeight = parseInt(this.$el.css('padding-top'), 10) + this.options.pageHeight * 1.5;
 		}
 
 		initContainerOffset() {
