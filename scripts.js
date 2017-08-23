@@ -262,7 +262,7 @@
 			this.urlHasStartPageInfo();
 
 			this.onScroll();
-			$window.on('scroll', this.onScroll);
+			$window.on('scroll', this.onScroll.bind(this));
 
 			// delete console.log
 			console.log(this.options.maxPagesNumber);
