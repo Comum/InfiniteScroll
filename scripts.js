@@ -184,21 +184,39 @@
 			this.prevPageTriggerHeight = parseInt(this.$el.css('padding-top'), 10) + this.options.pageHeight * 1.5;
 		}
 
+		replaceQueryParam(param, newval, search) {
+			var regex = new RegExp("([?;&])" + param + "[^&;]*[;&]?");
+			var query = search.replace(regex, "$1").replace(/&$/, '');
+
+			return (query.length > 2 ? query + "&" : "?") + (newval ? param + "=" + newval : '');
+		}
+
+		urlQueryParamValueUpdate() {
+			if ($(location).attr('href').split('?').length > 1) {
+				window.history.pushState("", "", this.replaceQueryParam(this.options.urlQueryParamName, this.currentPage, window.location.search));
+			} else {
+				window.history.pushState("", "", '?' + this.options.urlQueryParamName + '=' + this.currentPage, window.location.search);
+			}
+		}
+
 		currentPageControl(direction) {
 			if (direction === 'down') {
 				if (this.pagesViewport > this.pagesCurrentHeight) {
 					this.currentPage++;
+					this.urlQueryParamValueUpdate();
 				}
 			} else if (direction === 'up') {
 				if (this.urlStartUp) {
 					// first load when the url is used
 					if ((this.pagesViewport < this.prevPageTriggerHeight) && (this.currentPage > 1)) {
 						this.currentPage--;
+						this.urlQueryParamValueUpdate();
 						this.urlStartUp = false;
 					}
 				} else {
 					if ((this.pagesViewport < (this.pagesCurrentHeight - this.options.pageHeight * 0.5)) && (this.currentPage > 1)) {
 						this.currentPage--;
+						this.urlQueryParamValueUpdate();
 					}
 				}
 			}
