@@ -243,7 +243,8 @@
 		pageHeight: -1,
 		maxPagesNumber: -1,
 		startPage: -1,
-		loadPageFunction: -1
+		loadPageFunction: -1,
+		pageClassName: -1
 	};
 
 	var $window = $(window);
@@ -269,6 +270,7 @@
 			console.log(this.options.pageHeight);
 			console.log(this.options.startPage);
 			console.log(this.options.loadPageFunction);
+			console.log(this.options.pageClassName);
 			console.log(this.pagePlaceholder);
 			console.log(this.currentPage);
 		}
@@ -290,6 +292,10 @@
 				this.options.loadPageFunction = this.$el.data('infoOnPages');
 			}
 
+			if (this.options.pageClassName === -1) {
+				this.options.pageClassName = this.$el.data('pageClassName');
+			}
+
 			this.currentPage = this.options.startPage;
 			this.pageCount = 0;
 			this.deletedPages = 0;
@@ -299,13 +305,16 @@
 			this.pagesObjHeight = 0;
 			this.pagesCurrentHeight = 0;
 			this.nextPageTriggerHeight = 0;
-
-			// screen half way through first visible page
-			this.prevPageTriggerHeight = parseInt(this.$el.css('padding-top'), 10) + this.options.pageHeight * 1.5;
+			this.prevPageTriggerHeight = 0;
+			this.$pages = this.$el.find('.pageSingle');
 		}
 
 		initContainerOffset() {
 			this.pagePlaceholder = this.$el.position().top;
+		}
+
+		updateContainerPadding(paddingValue) {
+			this.$el.css('padding-top', paddingValue + 'px');
 		}
 
 		loadPage(position, printPageNumber) {
@@ -315,10 +324,39 @@
 			} else if (position === 'end') {
 				this.$el.append(html);
 			}
+			this.$pages = this.$el.find('.pageSingle');
 		}
 
-		updateContainerPadding() {
-			this.$el.css('padding-top', ((this.currentPage - 1) * this.options.pageHeight) + 'px');
+		loadPrevPage() {
+// console.log(this.pagesViewport);
+			if ((this.pagesViewport < this.prevPageTriggerHeight) && (this.deletedPages > 0)) {
+				this.loadPage('ini', (this.currentPage - 1));
+				this.deletedPages--;
+				this.updateContainerPadding(this.deletedPages * this.options.pageHeight);
+			}
+		}
+
+		loadNextPage() {
+			if (this.pagesViewport > this.nextPageTriggerHeight) {
+				this.pageCount++;
+				this.loadPage('end', this.pageCount);
+			}
+		}
+
+		removePage(position) {
+			if (position === 'first') {
+				// this.$pages.splice(0,1);
+				$('.pageSingle:first-child').remove();
+				this.deletedPages++;
+				// $pagesSpacer.height(deletedPages * pageHeight);
+				this.updateContainerPadding(this.deletedPages * this.options.pageHeight);
+			} else if (position === 'last') {
+				// this.$pages.splice($pages.lengths-1,1);
+				$('.pageSingle:last-child').remove();
+				this.pageCount--;
+			}
+
+			this.$pages = this.$el.find('.pageSingle');
 		}
 
 		urlHasStartPageInfo() {
@@ -350,7 +388,7 @@
 				this.loadPage('end', this.currentPage);
 
 				if (currentPage > 1) {
-					this.updateContainerPadding(); // needs to be created
+					this.updateContainerPadding((this.currentPage - 1) * this.options.pageHeight); // needs to be created
 
 					scrollAmount = this.$el.offset().top + this.options.pageHeight * this.currentPage;
 					setTimeout(function () {
@@ -366,7 +404,7 @@
 		}
 
 		updateValues() {
-			this.pagesViewport = this.screenHeight - this.pagePlaceholder;
+			this.pagesViewport = screenHeight - this.pagePlaceholder;
 			this.pagesObjHeight = this.options.pageHeight * this.pageCount;
 			this.pagesCurrentHeight = this.options.pageHeight * this.currentPage;
 
@@ -377,13 +415,51 @@
 			this.prevPageTriggerHeight = parseInt(this.$el.css('padding-top'), 10) + this.options.pageHeight * 1.5;
 		}
 
-		scrollingOptions() {
+		currentPageControl(direction) {
+			if (direction === 'down') {
+				if (this.pagesViewport > this.pagesCurrentHeight) {
+					this.currentPage++;
+				}
+			} else if (direction === 'up') {
+				if (this.urlStartUp) {
+					// first load when the url is used
+					if ((this.pagesViewport < this.prevPageTriggerHeight) && (this.currentPage > 1)) {
+						this.currentPage--;
+						this.urlStartUp = false;
+					}
+				} else {
+					if ((this.pagesViewport < (this.pagesCurrentHeight - this.options.pageHeight * 0.5)) && (this.currentPage > 1)) {
+						this.currentPage--;
+					}
+				}
+			}
+		}
 
+		scrollingOptions() {
+			if (this.prevScroll > this.scrollValue) { // scroll up
+
+				this.pagesViewport = this.pagesViewport + this.scrollValue;
+
+				this.currentPageControl('up');
+				this.loadPrevPage();
+
+				if (this.$pages.length > this.options.maxPagesNumber) {
+					this.removePage('last');
+				}
+			} else if ((this.prevScroll < this.scrollValue) && (this.prevScroll !== 0)){ // scroll down
+
+				this.pagesViewport = this.pagesViewport + this.scrollValue;
+
+				this.currentPageControl('down');
+				this.loadNextPage();
+
+				if (this.$pages.length > this.options.maxPagesNumber) {
+					this.removePage('first');
+				}
+			}
 		}
 
 		onScroll() {
-			console.log('scrolling');
-
 			this.scrollValue = $document.scrollTop();
 
 			// check if the screen is at half size
@@ -420,6 +496,7 @@ $(document).ready(function () {
 		maxPagesNumber: 3,
 		pageHeight: 1584,
 		startPage: 1,
-		loadPageFunction: 'productTileFetcher'
+		loadPageFunction: 'productTileFetcher',
+		pageClassName: 'pageSingle'
 	});
 });
