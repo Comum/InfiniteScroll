@@ -21,7 +21,8 @@
 		maxPagesNumber: -1,
 		startPage: -1,
 		loadPageFunction: -1,
-		pageClassName: -1
+		pageClassName: -1,
+		urlQueryParamName: -1
 	};
 
 	var $window = $(window);
@@ -41,15 +42,6 @@
 
 			this.onScroll();
 			$window.on('scroll', this.onScroll.bind(this));
-
-			// delete console.log
-			console.log(this.options.maxPagesNumber);
-			console.log(this.options.pageHeight);
-			console.log(this.options.startPage);
-			console.log(this.options.loadPageFunction);
-			console.log(this.options.pageClassName);
-			console.log(this.pagePlaceholder);
-			console.log(this.currentPage);
 		}
 
 		init() {
@@ -71,6 +63,10 @@
 
 			if (this.options.pageClassName === -1) {
 				this.options.pageClassName = this.$el.data('pageClassName');
+			}
+
+			if (this.options.urlQueryParamName === -1) {
+				this.options.urlQueryParamName = this.$el.data('urlQueryParamName');
 			}
 
 			this.currentPage = this.options.startPage;
@@ -134,7 +130,7 @@
 
 		urlHasStartPageInfo() {
 			var scrollAmount;
-			var urlStartPage = 'startPage';
+			var urlStartPage = this.options.urlQueryParamName;
 			var currentPage;
 			var arr = $(location)
 				.attr('href')
@@ -270,6 +266,7 @@ $(document).ready(function () {
 		pageHeight: 1584,
 		startPage: 1,
 		loadPageFunction: 'productTileFetcher',
-		pageClassName: 'pageSingle'
+		pageClassName: 'pageSingle',
+		urlQueryParamName: 'startPage'
 	});
 });
