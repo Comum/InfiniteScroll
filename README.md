@@ -24,6 +24,6 @@ This will create a demo project in the dist folder
 
 ## Publishing
 ```
-npm run build
+NODE_ENV=production npm run build
 npm publish
 ```
