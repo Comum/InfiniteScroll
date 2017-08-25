@@ -30,6 +30,52 @@ npm publish
 
 ## How to use
 
-### Option 1 using default values
+## Install plugin
 
-### Option 1 using default values
+```
+npm install jquery-heaven-scroll
+```
+
+This plugin requires some information to be passed to it in order to work.
+
+### Option 1 using arguments values (will overwrite option 2 values)
+
+One way to send this information is passing an array as argument to the method, like:
+
+```
+/**
+* Returns html to be written inside .pageSingle
+* @param {integer} pageNumber
+*/
+function productTileFetcher(pageNumber) {
+	// (...)
+}
+
+var $pagesContainer = $('.your-selector-classname');
+
+$pagesContainer.heavenScroll({
+		maxPagesNumber: 3, // maximum number of pages shown
+		pageHeight: 1584, // page height
+		startPage: 1, // page to start (gets overwritten if url has query parameter)
+		loadPageFunction: 'productTileFetcher',  // function that returns the html to be shown
+		pageClassName: 'pageSingle', // page class
+		urlQueryParamName: 'startPage' // page to start url query parameter name
+    });
+```
+
+### Option 2 using data attributes values
+
+Another way to send this information is by using data-attributes in the `$pagesContainer` element, like:
+
+```
+<div class="pagesContainer"
+	 data-start-page="1"
+	 data-max-pages="3"
+	 data-page-height="1584"
+	 data-info-on-pages="productTileFetcher"
+	 data-page-class-name="pageSingle"
+	 data-url-query-param-name="startPage">
+</div>
+```
+
+## NOTE: For an example check the `demo` folder
