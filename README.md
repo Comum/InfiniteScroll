@@ -45,10 +45,12 @@ One way to send this information is passing an array as argument to the method, 
 ```
 /**
  * Returns html to be written inside .pageSingle
- * @param {string} pageClassName
- * @param {integer} pageNumber
+ * @param {object} options
+ * @param {string} options.pageClassName
+ * @param {integer} options.pageNumber
+ * @param {function} cb
  */
-function productTileFetcher(pageClassName, pageNumber) {
+function productTileFetcher(options, cb) {
 	// (...)
 }
 
