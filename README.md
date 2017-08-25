@@ -69,9 +69,9 @@ Another way to send this information is by using data-attributes in the `$pagesC
 
 ```
 <div class="pagesContainer"
-	 data-start-page="1"
 	 data-max-pages="3"
 	 data-page-height="1584"
+	 data-start-page="1"
 	 data-info-on-pages="productTileFetcher"
 	 data-page-class-name="pageSingle"
 	 data-url-query-param-name="startPage">
