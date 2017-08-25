@@ -44,10 +44,11 @@ One way to send this information is passing an array as argument to the method, 
 
 ```
 /**
-* Returns html to be written inside .pageSingle
-* @param {integer} pageNumber
-*/
-function productTileFetcher(pageNumber) {
+ * Returns html to be written inside .pageSingle
+ * @param {string} pageClassName
+ * @param {integer} pageNumber
+ */
+function productTileFetcher(pageClassName, pageNumber) {
 	// (...)
 }
 
@@ -57,9 +58,9 @@ $pagesContainer.heavenScroll({
 		maxPagesNumber: 3, // maximum number of pages shown
 		pageHeight: 1584, // page height
 		startPage: 1, // page to start (gets overwritten if url has query parameter)
-		loadPageFunction: 'productTileFetcher',  // function that returns the html to be shown
 		pageClassName: 'pageSingle', // page class
-		urlQueryParamName: 'startPage' // page to start url query parameter name
+		urlQueryParamName: 'startPage', // page to start url query parameter name
+		loadPageFunction: productTileFetcher  // function that returns the html to be shown
     });
 ```
 
@@ -72,7 +73,6 @@ Another way to send this information is by using data-attributes in the `$pagesC
 	 data-max-pages="3"
 	 data-page-height="1584"
 	 data-start-page="1"
-	 data-info-on-pages="productTileFetcher"
 	 data-page-class-name="pageSingle"
 	 data-url-query-param-name="startPage">
 </div>
