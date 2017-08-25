@@ -177,6 +177,7 @@ class HeavenScroll {
         return (query.length > 2 ? query + "&" : "?") + (newval ? param + "=" + newval : '');
     }
 
+    // change window.history to window.location.search
     urlQueryParamValueUpdate() {
         if ($(location).attr('href').split('?').length > 1) {
             window.history.pushState("", "", this.replaceQueryParam(this.options.urlQueryParamName, this.currentPage, window.location.search));
