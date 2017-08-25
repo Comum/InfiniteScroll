@@ -6,9 +6,9 @@ var defaultOptions = {
     pageHeight: -1,
     maxPagesNumber: -1,
     startPage: -1,
-    loadPageFunction: -1,
     pageClassName: -1,
-    urlQueryParamName: -1
+    urlQueryParamName: -1,
+    loadPageFunction: function () {}
 };
 
 var $window = $(window);
@@ -27,7 +27,7 @@ class HeavenScroll {
         this.urlHasStartPageInfo();
 
         this.onScroll();
-        $window.on('scroll', this.onScroll.bind(this));
+        $window.on('scroll', () => this.onScroll());
     }
 
     init() {
@@ -41,10 +41,6 @@ class HeavenScroll {
 
         if (this.options.startPage === -1) {
             this.options.startPage = this.$el.data('startPage');
-        }
-
-        if (this.options.loadPageFunction === -1) {
-            this.options.loadPageFunction = this.$el.data('infoOnPages');
         }
 
         if (this.options.pageClassName === -1) {
@@ -77,13 +73,19 @@ class HeavenScroll {
     }
 
     loadPage(position, printPageNumber) {
-        var html = '<div class="' + this.options.pageClassName + '">' + printPageNumber + '</div>';
-        if (position === 'ini') {
-            this.$el.prepend(html);
-        } else if (position === 'end') {
-            this.$el.append(html);
+        let args = {
+            pageClassName: this.options.pageClassName,
+            pageNumber: printPageNumber
         }
-        this.$pages = this.$el.find('.' + this.options.pageClassName);
+
+        this.options.loadPageFunction(args, (html) => {
+            if (position === 'ini') {
+                this.$el.prepend(html);
+            } else if (position === 'end') {
+                this.$el.append(html);
+            }
+            this.$pages = this.$el.find('.' + this.options.pageClassName);
+        });
     }
 
     loadPrevPage() {
@@ -143,9 +145,8 @@ class HeavenScroll {
             this.loadPage('end', this.currentPage);
 
             if (currentPage > 1) {
-                this.updateContainerPadding((this.currentPage - 1) * this.options.pageHeight); // needs to be created
-
-                scrollAmount = this.$el.offset().top + this.options.pageHeight * this.currentPage;
+                this.updateContainerPadding((this.currentPage - 2) * this.options.pageHeight + this.pagePlaceholder);
+                scrollAmount = (this.pagePlaceholder * 2) + this.options.pageHeight * (this.currentPage - 1);
                 setTimeout(function () {
                     $htmlBody.animate({ scrollTop: scrollAmount }, 0);
                 }, 0);
@@ -177,12 +178,11 @@ class HeavenScroll {
         return (query.length > 2 ? query + "&" : "?") + (newval ? param + "=" + newval : '');
     }
 
-    // change window.history to window.location.search
     urlQueryParamValueUpdate() {
         if ($(location).attr('href').split('?').length > 1) {
-            window.history.pushState("", "", this.replaceQueryParam(this.options.urlQueryParamName, this.currentPage, window.location.search));
+            window.history.replaceState("", "", this.replaceQueryParam(this.options.urlQueryParamName, this.currentPage, window.location.search));
         } else {
-            window.history.pushState("", "", '?' + this.options.urlQueryParamName + '=' + this.currentPage, window.location.search);
+            window.history.replaceState("", "", '?' + this.options.urlQueryParamName + '=' + this.currentPage, window.location.search);
         }
     }
 
