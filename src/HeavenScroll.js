@@ -143,9 +143,8 @@ class HeavenScroll {
             this.loadPage('end', this.currentPage);
 
             if (currentPage > 1) {
-                this.updateContainerPadding((this.currentPage - 1) * this.options.pageHeight); // needs to be created
-
-                scrollAmount = this.$el.offset().top + this.options.pageHeight * this.currentPage;
+                this.updateContainerPadding((this.currentPage - 2) * this.options.pageHeight + this.pagePlaceholder);
+                scrollAmount = (this.pagePlaceholder * 2) + this.options.pageHeight * (this.currentPage - 1);
                 setTimeout(function () {
                     $htmlBody.animate({ scrollTop: scrollAmount }, 0);
                 }, 0);
