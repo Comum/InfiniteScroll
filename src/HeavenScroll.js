@@ -6,9 +6,9 @@ var defaultOptions = {
     pageHeight: -1,
     maxPagesNumber: -1,
     startPage: -1,
-    loadPageFunction: -1,
     pageClassName: -1,
-    urlQueryParamName: -1
+    urlQueryParamName: -1,
+    loadPageFunction: function () {}
 };
 
 var $window = $(window);
@@ -27,7 +27,7 @@ class HeavenScroll {
         this.urlHasStartPageInfo();
 
         this.onScroll();
-        $window.on('scroll', this.onScroll.bind(this));
+        $window.on('scroll', () => this.onScroll());
     }
 
     init() {
@@ -41,10 +41,6 @@ class HeavenScroll {
 
         if (this.options.startPage === -1) {
             this.options.startPage = this.$el.data('startPage');
-        }
-
-        if (this.options.loadPageFunction === -1) {
-            this.options.loadPageFunction = this.$el.data('infoOnPages');
         }
 
         if (this.options.pageClassName === -1) {
@@ -77,13 +73,19 @@ class HeavenScroll {
     }
 
     loadPage(position, printPageNumber) {
-        var html = '<div class="' + this.options.pageClassName + '">' + printPageNumber + '</div>';
-        if (position === 'ini') {
-            this.$el.prepend(html);
-        } else if (position === 'end') {
-            this.$el.append(html);
+        let args = {
+            pageClassName: this.options.pageClassName,
+            pageNumber: printPageNumber
         }
-        this.$pages = this.$el.find('.' + this.options.pageClassName);
+
+        this.options.loadPageFunction(args, (html) => {
+            if (position === 'ini') {
+                this.$el.prepend(html);
+            } else if (position === 'end') {
+                this.$el.append(html);
+            }
+            this.$pages = this.$el.find('.' + this.options.pageClassName);
+        });
     }
 
     loadPrevPage() {
