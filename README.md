@@ -66,6 +66,8 @@ $pagesContainer.heavenScroll({
     });
 ```
 
+NOTE: the `loadPageFunction` must be passed in option 1.
+
 ### Option 2 using data attributes values
 
 Another way to send this information is by using data-attributes in the `$pagesContainer` element, like:
