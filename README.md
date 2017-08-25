@@ -66,7 +66,7 @@ $pagesContainer.heavenScroll({
     });
 ```
 
-NOTE: the `loadPageFunction` must be passed in option 1.
+NOTE: the `loadPageFunction` value must be passed in option 1.
 
 ### Option 2 using data attributes values
 
