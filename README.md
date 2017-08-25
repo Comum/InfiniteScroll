@@ -27,3 +27,9 @@ This will create a demo project in the dist folder
 NODE_ENV=production npm run build
 npm publish
 ```
+
+## How to use
+
+### Option 1 using default values
+
+### Option 1 using default values
