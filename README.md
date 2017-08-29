@@ -60,6 +60,7 @@ $pagesContainer.heavenScroll({
 		maxPagesNumber: 3, // maximum number of pages shown
 		pageHeight: 1584, // page height
 		startPage: 1, // page to start (gets overwritten if url has query parameter)
+		endPage: 10,
 		pageClassName: 'pageSingle', // page class
 		urlQueryParamName: 'startPage', // page to start url query parameter name
 		loadPageFunction: productTileFetcher  // function that returns the html to be shown
@@ -77,6 +78,7 @@ Another way to send this information is by using data-attributes in the `$pagesC
 	 data-max-pages="3"
 	 data-page-height="1584"
 	 data-start-page="1"
+	 data-end-page="10"
 	 data-page-class-name="pageSingle"
 	 data-url-query-param-name="startPage">
 </div>
