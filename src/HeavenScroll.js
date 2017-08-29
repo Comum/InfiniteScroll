@@ -125,36 +125,38 @@ class HeavenScroll {
             .split('?');
 
         if (arr.length > 1) {
-            this.urlStartUp = true;
+            if (arr[1].indexOf(urlStartPage) !== -1) {
+                this.urlStartUp = true;
 
-            arr[1]
-                .split('&')
-                .forEach(function (arg) {
-                    if (arg.indexOf(urlStartPage) !== -1) {
-                        currentPage = parseInt(arg.split('=')[1], 10);
-                        return;
-                    }
-                });
+                arr[1]
+                    .split('&')
+                    .forEach(function (arg) {
+                        if (arg.indexOf(urlStartPage) !== -1) {
+                            currentPage = parseInt(arg.split('=')[1], 10);
+                            return;
+                        }
+                    });
 
-            this.currentPage = currentPage;
-            this.firstRun = false;
+                this.currentPage = currentPage;
+                this.firstRun = false;
 
-            if (this.currentPage > 1) {
-                this.loadPage('end', (this.currentPage - 1));
-            }
-            this.loadPage('end', this.currentPage);
+                if (this.currentPage > 1) {
+                    this.loadPage('end', (this.currentPage - 1));
+                }
+                this.loadPage('end', this.currentPage);
 
-            if (currentPage > 1) {
-                this.updateContainerPadding((this.currentPage - 2) * this.options.pageHeight + this.pagePlaceholder);
-                scrollAmount = (this.pagePlaceholder * 2) + this.options.pageHeight * (this.currentPage - 1);
-                setTimeout(function () {
-                    $htmlBody.animate({ scrollTop: scrollAmount }, 0);
-                }, 0);
-            }
-            
-            this.pageCount = this.currentPage;
-            if (this.currentPage > 2) {
-                this.deletedPages = this.currentPage - 2;
+                if (currentPage > 1) {
+                    this.updateContainerPadding((this.currentPage - 2) * this.options.pageHeight + this.pagePlaceholder);
+                    scrollAmount = (this.pagePlaceholder * 2) + this.options.pageHeight * (this.currentPage - 1);
+                    setTimeout(function () {
+                        $htmlBody.animate({ scrollTop: scrollAmount }, 0);
+                    }, 0);
+                }
+                
+                this.pageCount = this.currentPage;
+                if (this.currentPage > 2) {
+                    this.deletedPages = this.currentPage - 2;
+                }
             }
         }
     }
