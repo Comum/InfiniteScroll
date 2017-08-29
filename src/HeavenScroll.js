@@ -56,8 +56,6 @@ class HeavenScroll {
             this.options.urlQueryParamName = this.$el.data('urlQueryParamName');
         }
 
-        console.log(this.options);
-
         this.currentPage = this.options.startPage;
         this.pageCount = 0;
         this.deletedPages = 0;
