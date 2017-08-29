@@ -20,6 +20,7 @@ $(document).ready(function () {
         maxPagesNumber: 3,
         pageHeight: 1584,
         startPage: 1,
+        endPage: 10,
         pageClassName: 'pageSingle',
         urlQueryParamName: 'startPage',
         loadPageFunction: productTileFetcher

@@ -6,6 +6,7 @@ var defaultOptions = {
     pageHeight: -1,
     maxPagesNumber: -1,
     startPage: -1,
+    endPage: -1,
     pageClassName: -1,
     urlQueryParamName: -1,
     loadPageFunction: function () {}
@@ -43,6 +44,10 @@ class HeavenScroll {
             this.options.startPage = this.$el.data('startPage');
         }
 
+        if (this.options.endPage === -1) {
+            this.options.endPage = this.$el.data('endPage');
+        }
+
         if (this.options.pageClassName === -1) {
             this.options.pageClassName = this.$el.data('pageClassName');
         }
@@ -50,6 +55,8 @@ class HeavenScroll {
         if (this.options.urlQueryParamName === -1) {
             this.options.urlQueryParamName = this.$el.data('urlQueryParamName');
         }
+
+        console.log(this.options);
 
         this.currentPage = this.options.startPage;
         this.pageCount = 0;
@@ -97,7 +104,7 @@ class HeavenScroll {
     }
 
     loadNextPage() {
-        if (this.pagesViewport > this.nextPageTriggerHeight) {
+        if ((this.pagesViewport > this.nextPageTriggerHeight) && (this.currentPage < this.options.endPage)) {
             this.pageCount++;
             this.loadPage('end', this.pageCount);
         }
