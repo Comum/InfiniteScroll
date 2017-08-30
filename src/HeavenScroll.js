@@ -3,6 +3,7 @@
  * Heaven Scroll
  */
 var defaultOptions = {
+    fadeInValue: 1500,
     pageHeight: -1,
     maxPagesNumber: -1,
     startPage: -1,
@@ -85,9 +86,9 @@ class HeavenScroll {
 
         this.options.loadPageFunction(args, (html) => {
             if (position === 'ini') {
-                this.$el.prepend(html);
+                $(html).hide().prependTo(this.$el).fadeIn(this.options.fadeInValue);
             } else if (position === 'end') {
-                this.$el.append(html);
+                $(html).hide().appendTo(this.$el).fadeIn(this.options.fadeInValue);
             }
             this.$pages = this.$el.find('.' + this.options.pageClassName);
         });
