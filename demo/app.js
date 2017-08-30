@@ -17,6 +17,7 @@ function productTileFetcher(options, cb) {
 
 $(document).ready(function () {
     $('.pagesContainer').heavenScroll({
+    	fadeInValue: 1500,
         maxPagesNumber: 3,
         pageHeight: 1584,
         startPage: 1,

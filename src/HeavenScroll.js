@@ -33,6 +33,10 @@ class HeavenScroll {
     }
 
     init() {
+        if (this.options.fadeInValue === -1) {
+            this.options.fadeInValue = this.$el.data('fadeInValue');
+        }
+        
         if (this.options.maxPagesNumber === -1) {
             this.options.maxPagesNumber = this.$el.data('maxPages');
         }
