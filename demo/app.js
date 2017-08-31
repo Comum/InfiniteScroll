@@ -12,7 +12,10 @@ import './style.scss';
  * @param {function} cb
  */
 function productTileFetcher(options, cb) {
-	cb('<div class="' + options.pageClassName + '">' + options.pageNumber + '</div>');
+	setTimeout(function () {
+		cb('<div class="' + options.pageClassName + '">' + options.pageNumber + '</div>');
+	}, 250);
+	// cb('<div class="' + options.pageClassName + '">' + options.pageNumber + '</div>');
 }
 
 $(document).ready(function () {

@@ -36,7 +36,7 @@ class HeavenScroll {
         if (this.options.fadeInValue === -1) {
             this.options.fadeInValue = this.$el.data('fadeInValue');
         }
-        
+
         if (this.options.maxPagesNumber === -1) {
             this.options.maxPagesNumber = this.$el.data('maxPages');
         }
@@ -88,22 +88,26 @@ class HeavenScroll {
             pageNumber: printPageNumber
         }
 
-        this.options.loadPageFunction(args, (html) => {
-            if (position === 'ini') {
-                $(html).hide().prependTo(this.$el).fadeIn(this.options.fadeInValue);
-            } else if (position === 'end') {
-                $(html).hide().appendTo(this.$el).fadeIn(this.options.fadeInValue);
-            }
-            this.$pages = this.$el.find('.' + this.options.pageClassName);
+        return new Promise((resolve, reject) => {
+            this.options.loadPageFunction(args, (html) => {
+                if (position === 'ini') {
+                    $(html).hide().prependTo(this.$el).fadeIn(this.options.fadeInValue);
+                } else if (position === 'end') {
+                    $(html).hide().appendTo(this.$el).fadeIn(this.options.fadeInValue);
+                }
+
+                this.$pages = this.$el.find('.' + this.options.pageClassName);
+
+                resolve();
+            });
         });
     }
 
     loadPrevPage() {
-        if ((this.pagesViewport < this.prevPageTriggerHeight) && (this.deletedPages > 0)) {
-            this.loadPage('ini', (this.currentPage - 1));
-            this.deletedPages--;
-            this.updateContainerPadding(this.deletedPages * this.options.pageHeight);
+        if ((this.pagesViewport < this.prevPageTriggerHeight) && (this.currentPage > 1)) { console.log('aqui');
+            return this.loadPage('ini', (this.currentPage - 1));
         }
+        return Promise.resolve();
     }
 
     loadNextPage() {
@@ -199,12 +203,14 @@ class HeavenScroll {
     }
 
     currentPageControl(direction) {
-        if (direction === 'down') {
+        if (direction === 'down') { // console.log('down ' + this.prevScroll + ' ' + this.scrollValue);
             if (this.pagesViewport > this.pagesCurrentHeight) {
-                this.currentPage++;
+                if (this.currentPage < this.options.endPage) {
+                    this.currentPage++;
+                }
                 this.urlQueryParamValueUpdate();
             }
-        } else if (direction === 'up') {
+        } else if (direction === 'up') { // console.log('up ' + this.prevScroll + ' ' + this.scrollValue);
             if (this.urlStartUp) {
                 // first load when the url is used
                 if ((this.pagesViewport < this.prevPageTriggerHeight) && (this.currentPage > 1)) {
@@ -223,17 +229,18 @@ class HeavenScroll {
 
     scrollingOptions() {
         if (this.prevScroll > this.scrollValue) { // scroll up
-
+            console.log('scrolling up');
             this.pagesViewport = this.pagesViewport + this.scrollValue;
 
             this.currentPageControl('up');
-            this.loadPrevPage();
-
-            if (this.$pages.length > this.options.maxPagesNumber) {
-                this.removePage('last');
-            }
+            this.loadPrevPage()
+                .then(() => {
+                    if (this.$pages.length > this.options.maxPagesNumber) {
+                        // this.removePage('last');
+                    }
+                });
         } else if ((this.prevScroll < this.scrollValue) && (this.prevScroll !== 0)){ // scroll down
-
+            console.log('scrolling down');
             this.pagesViewport = this.pagesViewport + this.scrollValue;
 
             this.currentPageControl('down');
@@ -242,6 +249,8 @@ class HeavenScroll {
             if (this.$pages.length > this.options.maxPagesNumber) {
                 this.removePage('first');
             }
+        } else {
+            console.log('picking up scraps');
         }
     }
 
@@ -250,15 +259,18 @@ class HeavenScroll {
 
         // check if the screen is at half size
         if (this.firstRun) {
-            this.pageCount++;
-            this.loadPage('end', this.pageCount);
             this.firstRun = false;
-            this.updateValues();
+            this.pageCount++;
 
-            if (this.pagesViewport > (this.options.pageHeight / 2)) {
-                this.pageCount++;
-                this.loadPage('end', this.pageCount);
-            }
+            this.loadPage('end', this.pageCount)
+                .then(() => {
+                    this.updateValues();
+
+                    if (this.pagesViewport > (this.options.pageHeight / 2)) {
+                        this.pageCount++;
+                        return this.loadPage('end', this.pageCount);
+                    }
+                });
         } else {
             this.updateValues();
             this.scrollingOptions();
