@@ -45,6 +45,11 @@ One way to send this information is passing an array as argument to the method, 
 ```
 /**
  * Returns html to be written inside .pageSingle
+ * -
+ * div that holds .pageSingle must have a data atrribuite of data-page-number that has value of options.pageNumber
+ * - 
+ * function deals with receiving a single page, or an array of pages to add 
+ * -
  * @param {object} options
  * @param {string} options.pageClassName
  * @param {integer} options.pageNumber

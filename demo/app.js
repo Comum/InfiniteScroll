@@ -12,11 +12,26 @@ import './style.scss';
  * @param {function} cb
  */
 function productTileFetcher(options, cb) {
-	cb('<div class="' + options.pageClassName + '">' + options.pageNumber + '</div>');
+	setTimeout(function () {
+        var html;
+
+        if (options.pageNumber.constructor === Array) {
+            html = '';
+
+            options.pageNumber.forEach(function (pageNumber) {
+                html = html + '<div class="' + options.pageClassName + '" data-page-number="' + pageNumber + '">' + pageNumber + '</div>';
+            });
+
+            cb(html);
+        } else {
+            cb('<div class="' + options.pageClassName + '" data-page-number="' + options.pageNumber + '">' + options.pageNumber + '</div>');
+        }
+	}, 250);
 }
 
 $(document).ready(function () {
     $('.pagesContainer').heavenScroll({
+    	fadeInValue: 1500,
         maxPagesNumber: 3,
         pageHeight: 1584,
         startPage: 1,
