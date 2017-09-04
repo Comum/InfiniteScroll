@@ -23,12 +23,12 @@ class HeavenScroll {
         this.el = el;
         this.$el = $(el);
         this.options = $.extend({}, defaultOptions, options) ;
-        
-        this.init();
-        this.initContainerOffset();
-        this.urlHasStartPageInfo();
 
-        this.onScroll();
+        this.init();
+        this.initContainerOffset(); // used?
+        this.urlHasStartPageInfo();
+        
+        this.initHeavenScroll();
         $window.on('scroll', () => this.onScroll());
     }
 
@@ -61,6 +61,8 @@ class HeavenScroll {
             this.options.urlQueryParamName = this.$el.data('urlQueryParamName');
         }
 
+        this.isPageLoading = false;
+        this.urlStartPage = 1; // if differnet than zero than url has startPage
         this.currentPage = this.options.startPage;
         this.pageCount = 0;
         this.deletedPages = 0;
@@ -76,6 +78,30 @@ class HeavenScroll {
 
     initContainerOffset() {
         this.pagePlaceholder = this.$el.position().top;
+    }
+
+    urlHasStartPageInfo() {
+        var arr = $(location)
+            .attr('href')
+            .split('?');
+
+        if (arr.length > 1) {
+            if (arr[1].indexOf(this.options.urlQueryParamName) !== -1) {
+                arr[1]
+                    .split('&')
+                    .forEach(function (arg) {
+                        var pageValue;
+
+                        if (arg.indexOf(this.options.urlQueryParamName) !== -1) {
+                            pageValue = parseInt(arg.split('=')[1], 10);
+                            if (pageValue > 1) {
+                                this.urlStartPage = parseInt(arg.split('=')[1], 10);
+                            }
+                            return;
+                        }
+                    }.bind(this));
+            }
+        }
     }
 
     updateContainerPadding(paddingValue) {
@@ -103,6 +129,80 @@ class HeavenScroll {
         });
     }
 
+    initHeavenScroll() {
+        if (this.urlStartPage > 1) { // load 3 pages, 1 before and 1 after
+            return this.loadPage('ini', [(this.urlStartPage - 1), this.urlStartPage, (this.urlStartPage + 1)])
+                .then(() => {
+                    // only if startPage is bigger than 3 it will update padding on start up
+                    if (this.urlStartPage > 2) {
+                        this.updateContainerPadding((this.urlStartPage - 2) * this.options.pageHeight);
+                        // scroll to page
+                        setTimeout(function () {
+                            var firstPage = document.getElementsByClassName(this.options.pageClassName)[1].getBoundingClientRect().top;
+
+                            $htmlBody.animate({ scrollTop: firstPage }, 0);
+                        }.bind(this), 0);
+                    }
+                });
+        }
+
+        return this.loadPage('ini', this.urlStartPage);
+    }
+
+    removePage(position) {
+        if (position === 'first') {
+            $('.' + this.options.pageClassName + ':first-child').remove();
+        } else if (position === 'last') {
+            $('.' + this.options.pageClassName + ':last-child').remove();
+        }
+    }
+
+    onScroll() {
+        var firstPageNumber;
+        var pages = document.getElementsByClassName(this.options.pageClassName);
+        var pagesLength = $('.' + this.options.pageClassName).length;
+
+        if (!this.isPageLoading) {
+            this.scrollValue = $document.scrollTop();
+
+            if (this.prevScroll > this.scrollValue) { // scroll up
+                if (((Math.abs(pages[0].getBoundingClientRect().top) - Math.abs(pages[0].getBoundingClientRect().bottom)) <= (screenHeight - 50)) && (pages[0].getAttribute('data-page-number') > 1)) {
+                    this.isPageLoading = true;
+                    
+                    return this.loadPage('ini', (parseInt(pages[0].getAttribute('data-page-number')) - 1))
+                    .then(() => {
+                        this.isPageLoading = false;
+                        if (pagesLength >= this.options.maxPagesNumber) {
+                            this.removePage('last');
+                            firstPageNumber = $('.' + this.options.pageClassName + ':first-child').data('pageNumber');
+                            // For now just token height;
+                            this.updateContainerPadding((parseInt(firstPageNumber, 10) - 1) * this.options.pageHeight);
+                        }
+                    });
+                }
+            } else if ((this.prevScroll < this.scrollValue) && (this.prevScroll !== 0)) { // scroll down                
+                if ((Math.abs(pages[(pages.length - 1)].getBoundingClientRect().bottom) - Math.abs(pages[(pages.length - 1)].getBoundingClientRect().top)) <= (screenHeight - 50)) {
+                    this.isPageLoading = true;
+                    
+                    return this.loadPage('end', (parseInt(pages[(pages.length - 1)].getAttribute('data-page-number')) + 1))
+                    .then(() => {
+                        this.isPageLoading = false;
+                        if (pagesLength >= this.options.maxPagesNumber) {
+                            this.removePage('first');
+                            firstPageNumber = $('.' + this.options.pageClassName + ':first-child').data('pageNumber');
+                            // For now just token height;
+                            this.updateContainerPadding((parseInt(firstPageNumber, 10) - 1) * this.options.pageHeight);
+                        }
+                    });
+                }
+            }
+
+            this.prevScroll = this.scrollValue;
+        }
+    }
+
+    // ----------------------------------- Not used methods ---------------------------
+
     loadPrevPage() {
         if ((this.pagesViewport < this.prevPageTriggerHeight) && (this.currentPage > 1)) { console.log('aqui');
             return this.loadPage('ini', (this.currentPage - 1));
@@ -114,64 +214,6 @@ class HeavenScroll {
         if ((this.pagesViewport > this.nextPageTriggerHeight) && (this.currentPage < this.options.endPage)) {
             this.pageCount++;
             this.loadPage('end', this.pageCount);
-        }
-    }
-
-    removePage(position) {
-        if (position === 'first') {
-            $('.' + this.options.pageClassName + ':first-child').remove();
-            this.deletedPages++;
-            this.updateContainerPadding(this.deletedPages * this.options.pageHeight);
-        } else if (position === 'last') {
-            $('.' + this.options.pageClassName + ':last-child').remove();
-            this.pageCount--;
-        }
-
-        this.$pages = this.$el.find('.' + this.options.pageClassName);
-    }
-
-    urlHasStartPageInfo() {
-        var scrollAmount;
-        var urlStartPage = this.options.urlQueryParamName;
-        var currentPage;
-        var arr = $(location)
-            .attr('href')
-            .split('?');
-
-        if (arr.length > 1) {
-            if (arr[1].indexOf(urlStartPage) !== -1) {
-                this.urlStartUp = true;
-
-                arr[1]
-                    .split('&')
-                    .forEach(function (arg) {
-                        if (arg.indexOf(urlStartPage) !== -1) {
-                            currentPage = parseInt(arg.split('=')[1], 10);
-                            return;
-                        }
-                    });
-
-                this.currentPage = currentPage;
-                this.firstRun = false;
-
-                if (this.currentPage > 1) {
-                    this.loadPage('end', (this.currentPage - 1));
-                }
-                this.loadPage('end', this.currentPage);
-
-                if (currentPage > 1) {
-                    this.updateContainerPadding((this.currentPage - 2) * this.options.pageHeight + this.pagePlaceholder);
-                    scrollAmount = (this.pagePlaceholder * 2) + this.options.pageHeight * (this.currentPage - 1);
-                    setTimeout(function () {
-                        $htmlBody.animate({ scrollTop: scrollAmount }, 0);
-                    }, 0);
-                }
-                
-                this.pageCount = this.currentPage;
-                if (this.currentPage > 2) {
-                    this.deletedPages = this.currentPage - 2;
-                }
-            }
         }
     }
 
@@ -254,30 +296,30 @@ class HeavenScroll {
         }
     }
 
-    onScroll() {
-        this.scrollValue = $document.scrollTop();
+    // onScroll() {
+    //     this.scrollValue = $document.scrollTop();
 
-        // check if the screen is at half size
-        if (this.firstRun) {
-            this.firstRun = false;
-            this.pageCount++;
+    //     // check if the screen is at half size
+    //     if (this.firstRun) {
+    //         this.firstRun = false;
+    //         this.pageCount++;
 
-            this.loadPage('end', this.pageCount)
-                .then(() => {
-                    this.updateValues();
+    //         this.loadPage('end', this.pageCount)
+    //             .then(() => {
+    //                 this.updateValues();
 
-                    if (this.pagesViewport > (this.options.pageHeight / 2)) {
-                        this.pageCount++;
-                        return this.loadPage('end', this.pageCount);
-                    }
-                });
-        } else {
-            this.updateValues();
-            this.scrollingOptions();
-        }
+    //                 if (this.pagesViewport > (this.options.pageHeight / 2)) {
+    //                     this.pageCount++;
+    //                     return this.loadPage('end', this.pageCount);
+    //                 }
+    //             });
+    //     } else {
+    //         this.updateValues();
+    //         this.scrollingOptions();
+    //     }
 
-        this.prevScroll = this.scrollValue;
-    }
+    //     this.prevScroll = this.scrollValue;
+    // }
 }
 
 export default HeavenScroll;

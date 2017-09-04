@@ -13,7 +13,19 @@ import './style.scss';
  */
 function productTileFetcher(options, cb) {
 	setTimeout(function () {
-		cb('<div class="' + options.pageClassName + '">' + options.pageNumber + '</div>');
+        var html;
+
+        if (options.pageNumber.constructor === Array) {
+            html = '';
+
+            options.pageNumber.forEach(function (pageNumber) {
+                html = html + '<div class="' + options.pageClassName + '" data-page-number="' + pageNumber + '">' + pageNumber + '</div>';
+            });
+
+            cb(html);
+        } else {
+            cb('<div class="' + options.pageClassName + '" data-page-number="' + options.pageNumber + '">' + options.pageNumber + '</div>');
+        }
 	}, 250);
 	// cb('<div class="' + options.pageClassName + '">' + options.pageNumber + '</div>');
 }
