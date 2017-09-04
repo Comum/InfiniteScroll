@@ -27,7 +27,8 @@ class HeavenScroll {
         this.init();
         this.initContainerOffset(); // used?
         this.urlHasStartPageInfo();
-        
+
+        this.updateUrlStartPageParam('');
         this.initHeavenScroll();
         $window.on('scroll', () => this.onScroll());
     }
@@ -63,7 +64,7 @@ class HeavenScroll {
 
         this.isPageLoading = false;
         this.urlStartPage = 1; // if differnet than zero than url has startPage
-        this.currentPage = this.options.startPage;
+        this.currentPage = 1;
         this.pageCount = 0;
         this.deletedPages = 0;
         this.prevScroll = 0;
@@ -74,6 +75,7 @@ class HeavenScroll {
         this.nextPageTriggerHeight = 0;
         this.prevPageTriggerHeight = 0;
         this.$pages = this.$el.find('.' + this.options.pageClassName);
+        this.urlParams = [];
     }
 
     initContainerOffset() {
@@ -81,13 +83,13 @@ class HeavenScroll {
     }
 
     urlHasStartPageInfo() {
-        var arr = $(location)
+        this.urlParams = $(location)
             .attr('href')
             .split('?');
 
-        if (arr.length > 1) {
-            if (arr[1].indexOf(this.options.urlQueryParamName) !== -1) {
-                arr[1]
+        if (this.urlParams.length > 1) {
+            if (this.urlParams[1].indexOf(this.options.urlQueryParamName) !== -1) {
+                this.urlParams[1]
                     .split('&')
                     .forEach(function (arg) {
                         var pageValue;
@@ -97,6 +99,7 @@ class HeavenScroll {
                             if (pageValue > 1) {
                                 this.urlStartPage = parseInt(arg.split('=')[1], 10);
                             }
+                            this.currentPage = this.urlStartPage;
                             return;
                         }
                     }.bind(this));
@@ -134,7 +137,7 @@ class HeavenScroll {
             return this.loadPage('ini', [(this.urlStartPage - 1), this.urlStartPage, (this.urlStartPage + 1)])
                 .then(() => {
                     // only if startPage is bigger than 3 it will update padding on start up
-                    if (this.urlStartPage > 2) {
+                    if (this.urlStartPage > 1) {
                         this.updateContainerPadding((this.urlStartPage - 2) * this.options.pageHeight);
                         // scroll to page
                         setTimeout(function () {
@@ -157,15 +160,59 @@ class HeavenScroll {
         }
     }
 
+    replaceQueryParam(param, newval, search) {
+        var regex = new RegExp("([?;&])" + param + "[^&;]*[;&]?");
+        var query = search.replace(regex, "$1").replace(/&$/, '');
+
+        return (query.length > 2 ? query + "&" : "?") + (newval ? param + "=" + newval : '');
+    }
+
+    urlQueryParamValueUpdate(pageNumber) {
+        if (this.urlParams.length > 1) {
+            window.history.replaceState("", "", this.replaceQueryParam(this.options.urlQueryParamName, pageNumber, window.location.search));
+        } else {
+            window.history.replaceState("", "", '?' + this.options.urlQueryParamName + '=' + pageNumber, window.location.search);
+        }
+    }
+
+    updateUrlStartPageParam(scrolligOption) {
+        if (this.firstRun) {
+            if (this.urlStartPage === 1) {
+                this.urlQueryParamValueUpdate(this.urlStartPage);
+            }
+
+            this.firstRun = false;
+        }
+
+        if (scrolligOption === 'down') {
+            if ($('[data-page-number=' + (this.currentPage + 1) + ']').length) {
+                if ($('[data-page-number=' + (this.currentPage + 1) + ']')[0].getBoundingClientRect().top < (screenHeight * 0.75)) {
+                    this.currentPage++;
+                    this.urlQueryParamValueUpdate(this.currentPage);
+                }
+            }
+        } else if (scrolligOption === 'up') {
+            if ($('[data-page-number=' + (this.currentPage - 1) + ']').length) {
+                if ($('[data-page-number=' + (this.currentPage - 1) + ']')[0].getBoundingClientRect().bottom > (screenHeight * 0.25)) {
+                    this.currentPage--;
+                    this.urlQueryParamValueUpdate(this.currentPage);
+                }
+            }
+        }
+    }
+
     onScroll() {
         var firstPageNumber;
         var pages = document.getElementsByClassName(this.options.pageClassName);
         var pagesLength = $('.' + this.options.pageClassName).length;
 
+        $('.currentPageValue').html(this.currentPage);
+
         if (!this.isPageLoading) {
             this.scrollValue = $document.scrollTop();
 
             if (this.prevScroll > this.scrollValue) { // scroll up
+                this.updateUrlStartPageParam('up');
                 if (((Math.abs(pages[0].getBoundingClientRect().top) - Math.abs(pages[0].getBoundingClientRect().bottom)) <= (screenHeight - 50)) && (pages[0].getAttribute('data-page-number') > 1)) {
                     this.isPageLoading = true;
                     
@@ -180,7 +227,9 @@ class HeavenScroll {
                         }
                     });
                 }
-            } else if ((this.prevScroll < this.scrollValue) && (this.prevScroll !== 0)) { // scroll down                
+            } else if ((this.prevScroll < this.scrollValue) && (this.prevScroll !== 0)) { // scroll down
+                this.updateUrlStartPageParam('down');
+
                 if ((Math.abs(pages[(pages.length - 1)].getBoundingClientRect().bottom) - Math.abs(pages[(pages.length - 1)].getBoundingClientRect().top)) <= (screenHeight - 50)) {
                     this.isPageLoading = true;
                     
@@ -227,21 +276,6 @@ class HeavenScroll {
 
         // screen half way through first visible page
         this.prevPageTriggerHeight = parseInt(this.$el.css('padding-top'), 10) + this.options.pageHeight * 1.5;
-    }
-
-    replaceQueryParam(param, newval, search) {
-        var regex = new RegExp("([?;&])" + param + "[^&;]*[;&]?");
-        var query = search.replace(regex, "$1").replace(/&$/, '');
-
-        return (query.length > 2 ? query + "&" : "?") + (newval ? param + "=" + newval : '');
-    }
-
-    urlQueryParamValueUpdate() {
-        if ($(location).attr('href').split('?').length > 1) {
-            window.history.replaceState("", "", this.replaceQueryParam(this.options.urlQueryParamName, this.currentPage, window.location.search));
-        } else {
-            window.history.replaceState("", "", '?' + this.options.urlQueryParamName + '=' + this.currentPage, window.location.search);
-        }
     }
 
     currentPageControl(direction) {
