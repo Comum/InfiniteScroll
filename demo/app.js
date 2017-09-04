@@ -27,7 +27,6 @@ function productTileFetcher(options, cb) {
             cb('<div class="' + options.pageClassName + '" data-page-number="' + options.pageNumber + '">' + options.pageNumber + '</div>');
         }
 	}, 250);
-	// cb('<div class="' + options.pageClassName + '">' + options.pageNumber + '</div>');
 }
 
 $(document).ready(function () {

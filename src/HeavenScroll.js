@@ -113,10 +113,12 @@ class HeavenScroll {
 
         return new Promise((resolve, reject) => {
             this.options.loadPageFunction(args, (html) => {
-                if (position === 'ini') {
-                    $(html).hide().prependTo(this.$el).fadeIn(this.options.fadeInValue);
-                } else if (position === 'end') {
-                    $(html).hide().appendTo(this.$el).fadeIn(this.options.fadeInValue);
+                if (html !== '') {
+                    if (position === 'ini') {
+                        $(html).hide().prependTo(this.$el).fadeIn(this.options.fadeInValue);
+                    } else if (position === 'end') {
+                        $(html).hide().appendTo(this.$el).fadeIn(this.options.fadeInValue);
+                    }
                 }
 
                 this.$pages = this.$el.find('.' + this.options.pageClassName);
