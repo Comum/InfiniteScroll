@@ -63,17 +63,11 @@ class HeavenScroll {
         }
 
         this.isPageLoading = false;
-        this.urlStartPage = 1; // if differnet than zero than url has startPage
+        // if this.urlStartPage is differnet than zero than url has startPage
+        this.urlStartPage = 1;
         this.currentPage = 1;
-        this.pageCount = 0;
-        this.deletedPages = 0;
         this.prevScroll = 0;
         this.firstRun = true;
-        this.pagesViewport = 0;
-        this.pagesObjHeight = 0;
-        this.pagesCurrentHeight = 0;
-        this.nextPageTriggerHeight = 0;
-        this.prevPageTriggerHeight = 0;
         this.$pages = this.$el.find('.' + this.options.pageClassName);
         this.urlParams = [];
     }
@@ -206,8 +200,6 @@ class HeavenScroll {
         var pages = document.getElementsByClassName(this.options.pageClassName);
         var pagesLength = $('.' + this.options.pageClassName).length;
 
-        $('.currentPageValue').html(this.currentPage);
-
         if (!this.isPageLoading) {
             this.scrollValue = $document.scrollTop();
 
@@ -249,111 +241,6 @@ class HeavenScroll {
             this.prevScroll = this.scrollValue;
         }
     }
-
-    // ----------------------------------- Not used methods ---------------------------
-
-    loadPrevPage() {
-        if ((this.pagesViewport < this.prevPageTriggerHeight) && (this.currentPage > 1)) { console.log('aqui');
-            return this.loadPage('ini', (this.currentPage - 1));
-        }
-        return Promise.resolve();
-    }
-
-    loadNextPage() {
-        if ((this.pagesViewport > this.nextPageTriggerHeight) && (this.currentPage < this.options.endPage)) {
-            this.pageCount++;
-            this.loadPage('end', this.pageCount);
-        }
-    }
-
-    updateValues() {
-        this.pagesViewport = screenHeight - this.pagePlaceholder;
-        this.pagesObjHeight = this.options.pageHeight * this.pageCount;
-        this.pagesCurrentHeight = this.options.pageHeight * this.currentPage;
-
-        // screen half way through last visible page
-        this.nextPageTriggerHeight = this.pagesObjHeight - this.options.pageHeight / 2;
-
-        // screen half way through first visible page
-        this.prevPageTriggerHeight = parseInt(this.$el.css('padding-top'), 10) + this.options.pageHeight * 1.5;
-    }
-
-    currentPageControl(direction) {
-        if (direction === 'down') { // console.log('down ' + this.prevScroll + ' ' + this.scrollValue);
-            if (this.pagesViewport > this.pagesCurrentHeight) {
-                if (this.currentPage < this.options.endPage) {
-                    this.currentPage++;
-                }
-                this.urlQueryParamValueUpdate();
-            }
-        } else if (direction === 'up') { // console.log('up ' + this.prevScroll + ' ' + this.scrollValue);
-            if (this.urlStartUp) {
-                // first load when the url is used
-                if ((this.pagesViewport < this.prevPageTriggerHeight) && (this.currentPage > 1)) {
-                    this.currentPage--;
-                    this.urlQueryParamValueUpdate();
-                    this.urlStartUp = false;
-                }
-            } else {
-                if ((this.pagesViewport < (this.pagesCurrentHeight - this.options.pageHeight * 0.5)) && (this.currentPage > 1)) {
-                    this.currentPage--;
-                    this.urlQueryParamValueUpdate();
-                }
-            }
-        }
-    }
-
-    scrollingOptions() {
-        if (this.prevScroll > this.scrollValue) { // scroll up
-            console.log('scrolling up');
-            this.pagesViewport = this.pagesViewport + this.scrollValue;
-
-            this.currentPageControl('up');
-            this.loadPrevPage()
-                .then(() => {
-                    if (this.$pages.length > this.options.maxPagesNumber) {
-                        // this.removePage('last');
-                    }
-                });
-        } else if ((this.prevScroll < this.scrollValue) && (this.prevScroll !== 0)){ // scroll down
-            console.log('scrolling down');
-            this.pagesViewport = this.pagesViewport + this.scrollValue;
-
-            this.currentPageControl('down');
-            this.loadNextPage();
-
-            if (this.$pages.length > this.options.maxPagesNumber) {
-                this.removePage('first');
-            }
-        } else {
-            console.log('picking up scraps');
-        }
-    }
-
-    // onScroll() {
-    //     this.scrollValue = $document.scrollTop();
-
-    //     // check if the screen is at half size
-    //     if (this.firstRun) {
-    //         this.firstRun = false;
-    //         this.pageCount++;
-
-    //         this.loadPage('end', this.pageCount)
-    //             .then(() => {
-    //                 this.updateValues();
-
-    //                 if (this.pagesViewport > (this.options.pageHeight / 2)) {
-    //                     this.pageCount++;
-    //                     return this.loadPage('end', this.pageCount);
-    //                 }
-    //             });
-    //     } else {
-    //         this.updateValues();
-    //         this.scrollingOptions();
-    //     }
-
-    //     this.prevScroll = this.scrollValue;
-    // }
 }
 
 export default HeavenScroll;
