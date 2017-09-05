@@ -37,31 +37,59 @@ class HeavenScroll {
 
     init() {
         if (this.options.fadeInValue === -1) {
-            this.options.fadeInValue = this.$el.data('fadeInValue');
+            if (this.$el.data('fadeInValue')) {
+                this.options.fadeInValue = this.$el.data('fadeInValue');
+            } else {
+                this.options.fadeInValue = 1000;
+            }
         }
 
         if (this.options.maxPagesNumber === -1) {
-            this.options.maxPagesNumber = this.$el.data('maxPages');
+            if (this.$el.data('maxPages')) {
+                this.options.maxPagesNumber = this.$el.data('maxPages');
+            } else {
+                this.options.maxPagesNumber = 3;
+            }
         }
 
         if (this.options.pageHeight === -1) {
-            this.options.pageHeight = this.$el.data('pageHeight');
+            if (this.$el.data('pageHeight')) {
+                this.options.pageHeight = this.$el.data('pageHeight');
+            } else {
+                this.options.pageHeight = 1584;
+            }
         }
 
         if (this.options.startPage === -1) {
-            this.options.startPage = this.$el.data('startPage');
+            if (this.$el.data('startPage')) {
+                this.options.startPage = this.$el.data('startPage');
+            } else {
+                this.options.startPage = 1;
+            }
         }
 
         if (this.options.endPage === -1) {
-            this.options.endPage = this.$el.data('endPage');
+            if (this.$el.data('endPage')) {
+                this.options.endPage = this.$el.data('endPage');
+            } else {
+                this.options.endPage = 100;
+            }
         }
 
         if (this.options.pageClassName === -1) {
-            this.options.pageClassName = this.$el.data('pageClassName');
+            if (this.$el.data('pageClassName')) {
+                this.options.pageClassName = this.$el.data('');
+            } else {
+                this.options.pageClassName = 'pageSingle';
+            }
         }
 
         if (this.options.urlQueryParamName === -1) {
-            this.options.urlQueryParamName = this.$el.data('urlQueryParamName');
+            if (this.$el.data('urlQueryParamName')) {
+                this.options.urlQueryParamName = this.$el.data('urlQueryParamName');
+            } else {
+                this.options.urlQueryParamName = 'startPage';
+            }
         }
 
         this.isPageLoading = false;
@@ -92,8 +120,10 @@ class HeavenScroll {
 
                         if (arg.indexOf(this.options.urlQueryParamName) !== -1) {
                             pageValue = parseInt(arg.split('=')[1], 10);
-                            if (pageValue > 1) {
+                            if ((pageValue > 1) && (pageValue <= this.options.endPage)) {
                                 this.urlStartPage = parseInt(arg.split('=')[1], 10);
+                            } else if ((pageValue > 1) && (pageValue > this.options.endPage)){
+                                this.urlStartPage = this.options.endPage;
                             }
                             this.currentPage = this.urlStartPage;
                             return;
@@ -151,10 +181,15 @@ class HeavenScroll {
     }
 
     removePage(position) {
+        var pageHeight = pageHeight = $('.' + this.options.pageClassName + ':first-child').height();
+        var containerPadding = parseInt(this.$el.css('padding-top'));
+
         if (position === 'first') {
             $('.' + this.options.pageClassName + ':first-child').remove();
+            this.updateContainerPadding(pageHeight + containerPadding);
         } else if (position === 'last') {
             $('.' + this.options.pageClassName + ':last-child').remove();
+            this.updateContainerPadding(containerPadding - pageHeight);
         }
     }
 
@@ -214,7 +249,6 @@ class HeavenScroll {
     }
 
     onScroll() {
-        var firstPageNumber;
         var pages = document.getElementsByClassName(this.options.pageClassName);
         var pagesLength = $('.' + this.options.pageClassName).length;
 
@@ -233,9 +267,6 @@ class HeavenScroll {
                         this.isPageLoading = false;
                         if (pagesLength >= this.options.maxPagesNumber) {
                             this.removePage('last');
-                            firstPageNumber = $('.' + this.options.pageClassName + ':first-child').data('pageNumber');
-                            // For now just token height;
-                            this.updateContainerPadding((parseInt(firstPageNumber, 10) - 1) * this.options.pageHeight);
                         }
                     })
                     .finally( () => this.removeSpinner() );
@@ -253,9 +284,6 @@ class HeavenScroll {
                         this.isPageLoading = false;
                         if (pagesLength >= this.options.maxPagesNumber) {
                             this.removePage('first');
-                            firstPageNumber = $('.' + this.options.pageClassName + ':first-child').data('pageNumber');
-                            // For now just token height;
-                            this.updateContainerPadding((parseInt(firstPageNumber, 10) - 1) * this.options.pageHeight);
                         }
                     })
                     .finally( () => this.removeSpinner() );
