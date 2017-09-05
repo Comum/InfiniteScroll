@@ -37,31 +37,59 @@ class HeavenScroll {
 
     init() {
         if (this.options.fadeInValue === -1) {
-            this.options.fadeInValue = this.$el.data('fadeInValue');
+            if (this.$el.data('fadeInValue')) {
+                this.options.fadeInValue = this.$el.data('fadeInValue');
+            } else {
+                this.options.fadeInValue = 1000;
+            }
         }
 
         if (this.options.maxPagesNumber === -1) {
-            this.options.maxPagesNumber = this.$el.data('maxPages');
+            if (this.$el.data('maxPages')) {
+                this.options.maxPagesNumber = this.$el.data('maxPages');
+            } else {
+                this.options.maxPagesNumber = 3;
+            }
         }
 
         if (this.options.pageHeight === -1) {
-            this.options.pageHeight = this.$el.data('pageHeight');
+            if (this.$el.data('pageHeight')) {
+                this.options.pageHeight = this.$el.data('pageHeight');
+            } else {
+                this.options.pageHeight = 1584;
+            }
         }
 
         if (this.options.startPage === -1) {
-            this.options.startPage = this.$el.data('startPage');
+            if (this.$el.data('startPage')) {
+                this.options.startPage = this.$el.data('startPage');
+            } else {
+                this.options.startPage = 1;
+            }
         }
 
         if (this.options.endPage === -1) {
-            this.options.endPage = this.$el.data('endPage');
+            if (this.$el.data('endPage')) {
+                this.options.endPage = this.$el.data('endPage');
+            } else {
+                this.options.endPage = 100;
+            }
         }
 
         if (this.options.pageClassName === -1) {
-            this.options.pageClassName = this.$el.data('pageClassName');
+            if (this.$el.data('pageClassName')) {
+                this.options.pageClassName = this.$el.data('');
+            } else {
+                this.options.pageClassName = 'pageSingle';
+            }
         }
 
         if (this.options.urlQueryParamName === -1) {
-            this.options.urlQueryParamName = this.$el.data('urlQueryParamName');
+            if (this.$el.data('urlQueryParamName')) {
+                this.options.urlQueryParamName = this.$el.data('urlQueryParamName');
+            } else {
+                this.options.urlQueryParamName = 'startPage';
+            }
         }
 
         this.isPageLoading = false;
