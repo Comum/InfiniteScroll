@@ -181,10 +181,15 @@ class HeavenScroll {
     }
 
     removePage(position) {
+        var pageHeight = pageHeight = $('.' + this.options.pageClassName + ':first-child').height();
+        var containerPadding = parseInt(this.$el.css('padding-top'));
+
         if (position === 'first') {
             $('.' + this.options.pageClassName + ':first-child').remove();
+            this.updateContainerPadding(pageHeight + containerPadding);
         } else if (position === 'last') {
             $('.' + this.options.pageClassName + ':last-child').remove();
+            this.updateContainerPadding(containerPadding - pageHeight);
         }
     }
 
@@ -244,7 +249,6 @@ class HeavenScroll {
     }
 
     onScroll() {
-        var firstPageNumber;
         var pages = document.getElementsByClassName(this.options.pageClassName);
         var pagesLength = $('.' + this.options.pageClassName).length;
 
@@ -263,9 +267,6 @@ class HeavenScroll {
                         this.isPageLoading = false;
                         if (pagesLength >= this.options.maxPagesNumber) {
                             this.removePage('last');
-                            firstPageNumber = $('.' + this.options.pageClassName + ':first-child').data('pageNumber');
-                            // For now just token height;
-                            this.updateContainerPadding((parseInt(firstPageNumber, 10) - 1) * this.options.pageHeight);
                         }
                     })
                     .finally( () => this.removeSpinner() );
@@ -283,9 +284,6 @@ class HeavenScroll {
                         this.isPageLoading = false;
                         if (pagesLength >= this.options.maxPagesNumber) {
                             this.removePage('first');
-                            firstPageNumber = $('.' + this.options.pageClassName + ':first-child').data('pageNumber');
-                            // For now just token height;
-                            this.updateContainerPadding((parseInt(firstPageNumber, 10) - 1) * this.options.pageHeight);
                         }
                     })
                     .finally( () => this.removeSpinner() );
