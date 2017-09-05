@@ -73,3 +73,31 @@ body {
 
 	margin: 4px;
 }
+
+.Spinner {
+  position         : relative;
+  display          : none;
+  border-radius    : 50%;
+  width            : 16px;
+  height           : 16px;
+  border           : .125rem solid rgba(41, 46, 49, .32);
+  border-top-color : rgb(41, 46, 49);
+  animation        : spin .5s infinite linear;
+  transform        : translate(-50%, 0);
+  left             : 50%;
+  margin-top       : 32px;
+}
+
+.Spinner.light {
+  border           : .125rem solid rgba(255, 255, 255, .32);
+  border-top-color : rgb(255, 255, 255);
+}
+
+@keyframes spin {
+  0% {
+    transform : rotate(0deg);
+  }
+  100% {
+    transform : rotate(360deg);
+  }
+}
