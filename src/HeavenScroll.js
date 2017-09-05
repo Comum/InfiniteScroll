@@ -92,8 +92,10 @@ class HeavenScroll {
 
                         if (arg.indexOf(this.options.urlQueryParamName) !== -1) {
                             pageValue = parseInt(arg.split('=')[1], 10);
-                            if (pageValue > 1) {
+                            if ((pageValue > 1) && (pageValue <= this.options.endPage)) {
                                 this.urlStartPage = parseInt(arg.split('=')[1], 10);
+                            } else if ((pageValue > 1) && (pageValue > this.options.endPage)){
+                                this.urlStartPage = this.options.endPage;
                             }
                             this.currentPage = this.urlStartPage;
                             return;
