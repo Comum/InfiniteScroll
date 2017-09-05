@@ -10,7 +10,9 @@ var defaultOptions = {
     endPage: -1,
     pageClassName: -1,
     urlQueryParamName: -1,
-    loadPageFunction: function () {}
+    loadPageFunction: function () {},
+    hasSpinner: false,
+    spinnerClassName: -1
 };
 
 var $window = $(window);
@@ -197,6 +199,20 @@ class HeavenScroll {
         }
     }
 
+    addSpinner(position) {
+        var html = `<div class="${this.options.spinnerClassName}"></div>`;
+
+        if (position === 'top') {
+            this.$el.prepend(html);
+        } else if (position === 'bottom') {
+            this.$el.append(html);
+        }
+    }
+
+    removeSpinner() {
+        $('.' + this.options.spinnerClassName).remove();
+    }
+
     onScroll() {
         var firstPageNumber;
         var pages = document.getElementsByClassName(this.options.pageClassName);
@@ -209,7 +225,9 @@ class HeavenScroll {
                 this.updateUrlStartPageParam('up');
                 if (((Math.abs(pages[0].getBoundingClientRect().top) - Math.abs(pages[0].getBoundingClientRect().bottom)) <= (screenHeight - 50)) && (pages[0].getAttribute('data-page-number') > 1)) {
                     this.isPageLoading = true;
-                    
+
+                    this.addSpinner('top');
+
                     return this.loadPage('ini', (parseInt(pages[0].getAttribute('data-page-number')) - 1))
                     .then(() => {
                         this.isPageLoading = false;
@@ -219,7 +237,8 @@ class HeavenScroll {
                             // For now just token height;
                             this.updateContainerPadding((parseInt(firstPageNumber, 10) - 1) * this.options.pageHeight);
                         }
-                    });
+                    })
+                    .finally( () => this.removeSpinner() );
                 }
             } else if ((this.prevScroll < this.scrollValue) && (this.prevScroll !== 0)) { // scroll down
                 this.updateUrlStartPageParam('down');
@@ -227,6 +246,8 @@ class HeavenScroll {
                 if (((Math.abs(pages[(pages.length - 1)].getBoundingClientRect().bottom) - Math.abs(pages[(pages.length - 1)].getBoundingClientRect().top)) <= (screenHeight - 50)) && (this.currentPage < this.options.endPage)) {
                     this.isPageLoading = true;
                     
+                    this.addSpinner('bottom');
+
                     return this.loadPage('end', (parseInt(pages[(pages.length - 1)].getAttribute('data-page-number')) + 1))
                     .then(() => {
                         this.isPageLoading = false;
@@ -236,7 +257,8 @@ class HeavenScroll {
                             // For now just token height;
                             this.updateContainerPadding((parseInt(firstPageNumber, 10) - 1) * this.options.pageHeight);
                         }
-                    });
+                    })
+                    .finally( () => this.removeSpinner() );
                 }
             }
 

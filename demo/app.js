@@ -38,6 +38,8 @@ $(document).ready(function () {
         endPage: 10,
         pageClassName: 'pageSingle',
         urlQueryParamName: 'startPage',
-        loadPageFunction: productTileFetcher
+        loadPageFunction: productTileFetcher,
+        hasSpinner: true,
+        spinnerClassName: 'Spinner'
     });
 });
