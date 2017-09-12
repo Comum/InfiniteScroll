@@ -214,7 +214,7 @@ class HeavenScroll {
                     if (this.urlStartPage > 1) {
                         // scroll to page
                         setTimeout(function () {
-                            var firstPage = document.getElementsByClassName(this.options.pageClassName)[1].getBoundingClientRect().top;
+                            var firstPage = document.getElementsByClassName(this.options.pageClassName)[1].getBoundingClientRect().top + window.scrollY;
 
                             $htmlBody.animate({ scrollTop: firstPage }, 0);
                         }.bind(this), 0);
@@ -323,7 +323,7 @@ class HeavenScroll {
             });
         } else if (scrollDir === 'scrollDown') {
             pagesLength = $('.' + this.options.pageClassName).length;
-            
+
             this.addSpinner('bottom');
             return this.loadPage('end', pageNumber)
             .then(() => {
