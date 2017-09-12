@@ -31,11 +31,13 @@ function productTileFetcher(options, cb) {
             html = '';
 
             options.pageNumber.forEach((pageNumber, index) => {
+                quote = quote + '<br><a href="https://web.fe.up.pt/~ee08112/">Click Me!</a>';
                 html = html + this.wrapHtmlPage(quote, {pageClassName: options.pageClassName, pageHeight: options.pageHeight[index], pageNumber: pageNumber});
             });
 
             cb(html);
         } else {
+            quote = quote + '<br><a href="https://web.fe.up.pt/~ee08112/">Click Me!</a>';
             cb(this.wrapHtmlPage(quote, options));
         }
 	});
