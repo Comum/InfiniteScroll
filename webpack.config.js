@@ -50,7 +50,7 @@ let config = {
                 loader: 'babel-loader',
                 query: {
                    plugins: ["transform-runtime", "transform-decorators-legacy"],
-                   presets: ["es2015"]
+                   presets: ["es2017", "es2015"]
                  }
             },
             {

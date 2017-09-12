@@ -5,6 +5,19 @@
 import './style.scss';
 
 /**
+ * Returns a string to be included in the html
+ */
+function getQuote(cb) {
+    $.ajax({
+        async: false,
+        url: 'http://cors-proxy.htmldriven.com/?url=http://thoughtsoncoding.com/api/1.0/random.json',
+        success: function (data) {
+            cb(JSON.parse(data.body).quote);
+        }
+    });
+}
+
+/**
  * Returns html to be written inside .pageSingle
  * @param {object} options
  * @param {string} options.pageClassName
@@ -12,21 +25,23 @@ import './style.scss';
  * @param {function} cb
  */
 function productTileFetcher(options, cb) {
-	setTimeout(function () {
+	getQuote((quote) => {
         var html;
 
         if (options.pageNumber.constructor === Array) {
             html = '';
 
-            options.pageNumber.forEach(function (pageNumber) {
-                html = html + '<div class="' + options.pageClassName + '" data-page-number="' + pageNumber + '">' + pageNumber + '</div>';
+            options.pageNumber.forEach((pageNumber, index) => {
+                // html = this.wrapHtmlPage(html + '<div class="' + options.pageClassName + '" style="top: ' + options.pageHeight[index] + 'px" data-page-number="' + pageNumber + '">' + quote + '</div>');
+                html = html + this.wrapHtmlPage(quote, {pageClassName: options.pageClassName, pageHeight: options.pageHeight[index], pageNumber: pageNumber});
             });
 
             cb(html);
         } else {
-            cb('<div class="' + options.pageClassName + '" data-page-number="' + options.pageNumber + '">' + options.pageNumber + '</div>');
+            // cb(this.wrapHtmlPage('<div class="' + options.pageClassName + '" style="top: ' + options.pageHeight + 'px" data-page-number="' + options.pageNumber + '">' + quote + '</div>'));
+            cb(this.wrapHtmlPage(quote, options));
         }
-	}, 250);
+	});
 }
 
 $(document).ready(function () {
