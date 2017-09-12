@@ -312,11 +312,24 @@ class HeavenScroll {
     }
 
     loadingPage(scrollDir, pageNumber) {
+        var pagesLength;
+
         if (scrollDir === 'scrollUp') {
             this.addSpinner('top');
             return this.loadPage('ini', (pageNumber - 1))
             .then(() => {
                 this.removePage('last');
+                this.removeSpinner();
+            });
+        } else if (scrollDir === 'scrollDown') {
+            pagesLength = $('.' + this.options.pageClassName).length;
+            
+            this.addSpinner('bottom');
+            return this.loadPage('end', pageNumber)
+            .then(() => {
+                if (pagesLength >= this.options.maxPagesNumber) {
+                    this.removePage('first');
+                }
                 this.removeSpinner();
             });
         }
@@ -326,7 +339,6 @@ class HeavenScroll {
 
     onScroll() {
         var pages = document.getElementsByClassName(this.options.pageClassName);
-        var pagesLength = $('.' + this.options.pageClassName).length;
         var pageNumber;
 
         if (!this.isPageLoading) {
@@ -349,17 +361,13 @@ class HeavenScroll {
 
                 if (((Math.abs(pages[(pages.length - 1)].getBoundingClientRect().bottom) - Math.abs(pages[(pages.length - 1)].getBoundingClientRect().top)) <= (screenHeight - 50)) && (this.currentPage < this.options.endPage)) {
                     this.isPageLoading = true;
-                    
-                    this.addSpinner('bottom');
 
-                    return this.loadPage('end', (parseInt(pages[(pages.length - 1)].getAttribute('data-page-number')) + 1))
+                    pageNumber = parseInt(pages[(pages.length - 1)].getAttribute('data-page-number')) + 1;
+                    // returns false when done
+                    this.loadingPage('scrollDown', pageNumber)
                     .then(() => {
                         this.isPageLoading = false;
-                        if (pagesLength >= this.options.maxPagesNumber) {
-                            this.removePage('first');
-                        }
-                    })
-                    .finally( () => this.removeSpinner() );
+                    });
                 }
             }
 
