@@ -189,7 +189,15 @@ class HeavenScroll {
     }
 
     wrapHtmlPage(contentEl, options) {
-        return '<div class="' + options.pageClassName + '" style="position: absolute; top: ' + options.pageHeight + 'px" data-page-number="' + options.pageNumber + '">' + contentEl + '</div>';
+        return `<div
+                     class="${options.pageClassName}"
+                     style="
+                         position: absolute;
+                         top: ${options.pageHeight}px;"
+                     data-page-number="${options.pageNumber}"
+                     >
+                        ${contentEl}
+                </div>`;
     }
 
     initHeavenScroll() {
