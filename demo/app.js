@@ -9,7 +9,6 @@ import './style.scss';
  */
 function getQuote(cb) {
     $.ajax({
-        async: false,
         url: 'http://cors-proxy.htmldriven.com/?url=http://thoughtsoncoding.com/api/1.0/random.json',
         success: function (data) {
             cb(JSON.parse(data.body).quote);
@@ -32,13 +31,11 @@ function productTileFetcher(options, cb) {
             html = '';
 
             options.pageNumber.forEach((pageNumber, index) => {
-                // html = this.wrapHtmlPage(html + '<div class="' + options.pageClassName + '" style="top: ' + options.pageHeight[index] + 'px" data-page-number="' + pageNumber + '">' + quote + '</div>');
                 html = html + this.wrapHtmlPage(quote, {pageClassName: options.pageClassName, pageHeight: options.pageHeight[index], pageNumber: pageNumber});
             });
 
             cb(html);
         } else {
-            // cb(this.wrapHtmlPage('<div class="' + options.pageClassName + '" style="top: ' + options.pageHeight + 'px" data-page-number="' + options.pageNumber + '">' + quote + '</div>'));
             cb(this.wrapHtmlPage(quote, options));
         }
 	});

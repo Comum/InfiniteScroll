@@ -172,7 +172,7 @@ class HeavenScroll {
 
         return new Promise((resolve, reject) => {
             this.loadPageFunction = this.options.loadPageFunction;
-            this.loadPageFunction(args, (html) => { console.log(args);
+            this.loadPageFunction(args, (html) => {
                 if (html !== '') {
                     if (position === 'ini') {
                         $(html).hide().prependTo(this.$el).fadeIn(this.options.fadeInValue);
