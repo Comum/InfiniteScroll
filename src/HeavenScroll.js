@@ -189,12 +189,18 @@ class HeavenScroll {
     }
 
     wrapHtmlPage(contentEl, options) {
-        return '<div class="' + options.pageClassName + '" style="top: ' + options.pageHeight + 'px" data-page-number="' + options.pageNumber + '">' + contentEl + '</div>';
+        return '<div class="' + options.pageClassName + '" style="position: absolute; top: ' + options.pageHeight + 'px" data-page-number="' + options.pageNumber + '">' + contentEl + '</div>';
     }
 
     initHeavenScroll() {
+        var pagesArray = [];
         if (this.urlStartPage > 1) { // load 3 pages, 1 before and 1 after
-            return this.loadPage('ini', [(this.urlStartPage - 1), this.urlStartPage, (this.urlStartPage + 1)])
+            if (this.urlStartPage === this.options.endPage) {
+                pagesArray = [(this.urlStartPage - 1), this.urlStartPage];
+            } else {
+                pagesArray = [(this.urlStartPage - 1), this.urlStartPage, (this.urlStartPage + 1)];
+            }
+            return this.loadPage('ini', pagesArray)
                 .then(() => {
                     // only if startPage is bigger than 3 it will update padding on start up
                     if (this.urlStartPage > 1) {
