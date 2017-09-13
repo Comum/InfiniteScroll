@@ -52,7 +52,7 @@ One way to send this information is passing an array as argument to the method, 
  * -
  * @param {object} options
  * @param {string} options.pageClassName
- * @param {integer} options.pageNumber
+ * @param {integer|array} options.pageNumber
  * @param {function} cb
  */
 function productTileFetcher(options, cb) {
@@ -62,13 +62,15 @@ function productTileFetcher(options, cb) {
 var $pagesContainer = $('.your-selector-classname');
 
 $pagesContainer.heavenScroll({
+		fadeInValue: 1500, // page fade in duration
 		maxPagesNumber: 3, // maximum number of pages shown
 		pageHeight: 1584, // page height
 		startPage: 1, // page to start (gets overwritten if url has query parameter)
 		endPage: 10,
 		pageClassName: 'pageSingle', // page class
 		urlQueryParamName: 'startPage', // page to start url query parameter name
-		loadPageFunction: productTileFetcher  // function that returns the html to be shown
+		loadPageFunction: productTileFetcher,  // function that returns the html to be shown
+		spinnerClassName: 'Spinner' // default class name 'Spinner'
     });
 ```
 
