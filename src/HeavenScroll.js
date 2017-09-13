@@ -288,7 +288,7 @@ class HeavenScroll {
         var $lastPage;
 
         if (position === 'top') {
-            spinnerHeightPosition = $('.' + this.options.pageClassName + ':first-child').position().top;
+            spinnerHeightPosition = this.$el.find('.' + this.options.pageClassName + ':first-child').position().top;
             html = `<div
                         class="${this.options.spinnerClassName}"
                         style="
@@ -298,7 +298,7 @@ class HeavenScroll {
                     </div>`;
             this.$el.prepend(html);
         } else if (position === 'bottom') {
-            $lastPage = $('.' + this.options.pageClassName + ':last-child');
+            $lastPage = this.$el.find('.' + this.options.pageClassName + ':last-child');
             spinnerHeightPosition = $lastPage.position().top + $lastPage.outerHeight(true);
             html = `<div
                         class="${this.options.spinnerClassName}"
@@ -313,7 +313,7 @@ class HeavenScroll {
 
     removeSpinner(cb) {
         return new Promise((resolve, reject) => {
-            $.when($('.' + this.options.spinnerClassName).remove()).done(() => resolve());
+            $.when(this.$el.find('.' + this.options.spinnerClassName).remove()).done(() => resolve());
         });
     }
 
