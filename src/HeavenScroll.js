@@ -149,16 +149,16 @@ class HeavenScroll {
                 if (html !== '') {
                     if (position === 'iniHeaven') {
                         $(html).hide().prependTo(this.$el).fadeIn(this.options.fadeInValue);
+                        
+                        if (this.urlStartPage === 1) {
+                            localStorage.setItem('listingPage1', this.$el.find('.' + this.options.pageClassName + ':first').height());
+                        }
+
                     } else if (position === 'end') {
                         $(html).hide().appendTo(this.$el).fadeIn(this.options.fadeInValue);
                     } else if (position === 'ini') {
-                        // $('.placeHolderDiv:last').fadeOut(function () {
-                        //     $('.placeHolderDiv:last').replaceWith(html);
-                        //     $('.' + this.options.pageClassName + ':first').fadeIn(this.options.fadeInValue);
-                        // }.bind(this));
                         $(html).hide().insertAfter('.placeHolderDiv:last').fadeIn(this.options.fadeInValue);
                         $('.placeHolderDiv:last').remove();
-                        //$(html).hide().prependTo(this.$el).fadeIn(this.options.fadeInValue);
                     }
                 }
 
@@ -182,11 +182,13 @@ class HeavenScroll {
 
     populatePlaceholderEmptyDivs() {
         var html = '';
-        var placholderHeight = this.options.pageHeight;
+        var placholderHeight;
         var i;
 
-        for (i = (this.urlStartPage - 2) ; i > 0 ; i--) {
+        for (i = 1 ; i <= (this.urlStartPage - 2) ; i++) {
             // check if local variable with height exists and update placholderHeight value
+            placholderHeight = localStorage.getItem('listingPage' + i) || this.options.pageHeight;
+
             html = html + `<div class="placeHolderDiv" style="width: 100%; height: ${placholderHeight}px; position: relative;"></div>`;
         }
 
@@ -195,6 +197,7 @@ class HeavenScroll {
 
     initHeavenScroll() {
         var pagesArray = [];
+
         if (this.urlStartPage > 1) { // load 3 pages, 1 before and 1 after
             if (this.urlStartPage === this.options.endPage) {
                 pagesArray = [(this.urlStartPage - 1), this.urlStartPage];
@@ -246,11 +249,16 @@ class HeavenScroll {
     }
 
     urlQueryParamValueUpdate(pageNumber) {
+        var pageHeight;
+
         if (this.urlParams.length > 1) {
             window.history.replaceState("", "", this.replaceQueryParam(this.options.urlQueryParamName, pageNumber, window.location.search));
         } else {
             window.history.replaceState("", "", '?' + this.options.urlQueryParamName + '=' + pageNumber, window.location.search);
         }
+
+        pageHeight = this.$el.find(`.${this.options.pageClassName}[data-page-number=${pageNumber}]`).height();
+        localStorage.setItem('listingPage' + pageNumber, pageHeight);
     }
 
     updateUrlStartPageParam(scrolligOption) {
