@@ -27,7 +27,6 @@ class HeavenScroll {
         this.options = $.extend({}, defaultOptions, options) ;
 
         this.init();
-        this.initContainerOffset(); // used?
         this.urlHasStartPageInfo();
 
         this.updateUrlStartPageParam('');
@@ -93,7 +92,6 @@ class HeavenScroll {
         }
 
         this.isPageLoading = false;
-        // if this.urlStartPage is differnet than zero than url has startPage
         this.urlStartPage = 1;
         this.currentPage = 1;
         this.prevScroll = 0;
@@ -102,10 +100,6 @@ class HeavenScroll {
         this.urlParams = [];
 
         this.$el.css('position', 'relative');
-    }
-
-    initContainerOffset() {
-        this.pagePlaceholder = this.$el.position().top;
     }
 
     urlHasStartPageInfo() {
@@ -158,7 +152,7 @@ class HeavenScroll {
                         $(html).hide().appendTo(this.$el).fadeIn(this.options.fadeInValue);
                     } else if (position === 'ini') {
                         $(html).hide().insertAfter('.placeHolderDiv:last').fadeIn(this.options.fadeInValue);
-                        $('.placeHolderDiv:last').remove();
+                        this.$el.find('.placeHolderDiv:last').remove();
                     }
                 }
 
@@ -198,7 +192,8 @@ class HeavenScroll {
     initHeavenScroll() {
         var pagesArray = [];
 
-        if (this.urlStartPage > 1) { // load 3 pages, 1 before and 1 after
+        if (this.urlStartPage > 1) {
+            // load 3 pages, 1 before and 1 after
             if (this.urlStartPage === this.options.endPage) {
                 pagesArray = [(this.urlStartPage - 1), this.urlStartPage];
             } else {
@@ -271,15 +266,15 @@ class HeavenScroll {
         }
 
         if (scrolligOption === 'down') {
-            if ($('[data-page-number=' + (this.currentPage + 1) + ']').length) {
-                if ($('[data-page-number=' + (this.currentPage + 1) + ']')[0].getBoundingClientRect().top < (screenHeight * 0.75)) {
+            if (this.$el.find('[data-page-number=' + (this.currentPage + 1) + ']').length) {
+                if (this.$el.find('[data-page-number=' + (this.currentPage + 1) + ']')[0].getBoundingClientRect().top < (screenHeight * 0.75)) {
                     this.currentPage++;
                     this.urlQueryParamValueUpdate(this.currentPage);
                 }
             }
         } else if (scrolligOption === 'up') {
-            if ($('[data-page-number=' + (this.currentPage - 1) + ']').length) {
-                if ($('[data-page-number=' + (this.currentPage - 1) + ']')[0].getBoundingClientRect().bottom > (screenHeight * 0.25)) {
+            if (this.$el.find('[data-page-number=' + (this.currentPage - 1) + ']').length) {
+                if (this.$el.find('[data-page-number=' + (this.currentPage - 1) + ']')[0].getBoundingClientRect().bottom > (screenHeight * 0.25)) {
                     this.currentPage--;
                     this.urlQueryParamValueUpdate(this.currentPage);
                 }
@@ -333,7 +328,7 @@ class HeavenScroll {
                 this.removeSpinner();
             });
         } else if (scrollDir === 'scrollDown') {
-            pagesLength = $('.' + this.options.pageClassName).length;
+            pagesLength = this.$el.find('.' + this.options.pageClassName).length;
 
             this.addSpinner('bottom');
             return this.loadPage('end', pageNumber)
@@ -361,7 +356,6 @@ class HeavenScroll {
                     this.isPageLoading = true;
 
                     pageNumber = parseInt(pages[0].getAttribute('data-page-number'));
-                    // returns false when done
                     this.loadingPage('scrollUp', pageNumber)
                     .then(() => {
                         this.isPageLoading = false;
@@ -374,7 +368,6 @@ class HeavenScroll {
                     this.isPageLoading = true;
 
                     pageNumber = parseInt(pages[(pages.length - 1)].getAttribute('data-page-number')) + 1;
-                    // returns false when done
                     this.loadingPage('scrollDown', pageNumber)
                     .then(() => {
                         this.isPageLoading = false;
