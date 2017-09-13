@@ -12,7 +12,7 @@ var defaultOptions = {
     urlQueryParamName: -1,
     loadPageFunction: function () {},
     hasSpinner: false,
-    spinnerClassName: -1
+    spinnerClassName: 'Spinner'
 };
 
 var $window = $(window);

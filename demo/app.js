@@ -53,7 +53,6 @@ $(document).ready(function () {
         pageClassName: 'pageSingle',
         urlQueryParamName: 'startPage',
         loadPageFunction: productTileFetcher,
-        hasSpinner: true,
         spinnerClassName: 'Spinner'
     });
 });
