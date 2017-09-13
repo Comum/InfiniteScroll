@@ -11,7 +11,6 @@ var defaultOptions = {
     pageClassName: -1,
     urlQueryParamName: -1,
     loadPageFunction: function () {},
-    hasSpinner: false,
     spinnerClassName: 'Spinner'
 };
 
@@ -288,7 +287,7 @@ class HeavenScroll {
         var $lastPage;
 
         if (position === 'top') {
-            spinnerHeightPosition = this.$el.find('.' + this.options.pageClassName + ':first-child').position().top;
+            spinnerHeightPosition = this.$el.find('.' + this.options.pageClassName + ':first').position().top;
             html = `<div
                         class="${this.options.spinnerClassName}"
                         style="
@@ -321,7 +320,7 @@ class HeavenScroll {
         var pagesLength;
 
         if (scrollDir === 'scrollUp') {
-            // this.addSpinner('top');
+            this.addSpinner('top');
             return this.loadPage('ini', (pageNumber - 1))
             .then(() => {
                 this.removePage('last');
