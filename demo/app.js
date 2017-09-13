@@ -20,7 +20,7 @@ function getQuote(cb) {
  * Returns html to be written inside .pageSingle
  * @param {object} options
  * @param {string} options.pageClassName
- * @param {integer} options.pageNumber
+ * @param {integer|array} options.pageNumber
  * @param {function} cb
  */
 function productTileFetcher(options, cb) {
@@ -32,7 +32,7 @@ function productTileFetcher(options, cb) {
 
             options.pageNumber.forEach((pageNumber, index) => {
                 quote = quote + '<br><a href="https://web.fe.up.pt/~ee08112/">Click Me!</a>';
-                html = html + this.wrapHtmlPage(quote, {pageClassName: options.pageClassName, pageHeight: options.pageHeight[index], pageNumber: pageNumber});
+                html = html + this.wrapHtmlPage(quote, {pageClassName: options.pageClassName, pageNumber: pageNumber});
             });
 
             cb(html);

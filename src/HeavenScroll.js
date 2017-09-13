@@ -135,49 +135,30 @@ class HeavenScroll {
         }
     }
 
-    getPageTopValue(pageNumber) {
-        var heights = [];
-        var heightAux = 0;
-
-        if (pageNumber.constructor === Array) {
-            pageNumber.forEach((number) => {
-                // check if page number is locally stored
-                if (number !== 1) {
-                    heightAux = (number - 1) * this.options.pageHeight;
-                }
-
-                heights.push(heightAux);
-            });
-
-            return heights;
-        } else {
-            // check if page number is locally stored
-            if (pageNumber !== 1) {
-                heightAux = this.options.pageHeight * (pageNumber - 1);
-            }
-
-            return heightAux;
-        }
-    }
-
     loadPage(position, printPageNumber) {
         let args;
-        let pageHeightVal = this.getPageTopValue(printPageNumber);
 
         args = {
             pageClassName: this.options.pageClassName,
-            pageNumber: printPageNumber,
-            pageHeight: pageHeightVal
+            pageNumber: printPageNumber
         }
 
         return new Promise((resolve, reject) => {
             this.loadPageFunction = this.options.loadPageFunction;
             this.loadPageFunction(args, (html) => {
                 if (html !== '') {
-                    if (position === 'ini') {
+                    if (position === 'iniHeaven') {
                         $(html).hide().prependTo(this.$el).fadeIn(this.options.fadeInValue);
                     } else if (position === 'end') {
                         $(html).hide().appendTo(this.$el).fadeIn(this.options.fadeInValue);
+                    } else if (position === 'ini') {
+                        // $('.placeHolderDiv:last').fadeOut(function () {
+                        //     $('.placeHolderDiv:last').replaceWith(html);
+                        //     $('.' + this.options.pageClassName + ':first').fadeIn(this.options.fadeInValue);
+                        // }.bind(this));
+                        $(html).hide().insertAfter('.placeHolderDiv:last').fadeIn(this.options.fadeInValue);
+                        $('.placeHolderDiv:last').remove();
+                        //$(html).hide().prependTo(this.$el).fadeIn(this.options.fadeInValue);
                     }
                 }
 
@@ -192,12 +173,24 @@ class HeavenScroll {
         return `<div
                      class="${options.pageClassName}"
                      style="
-                         position: absolute;
-                         top: ${options.pageHeight}px;"
+                         position: relative;"
                      data-page-number="${options.pageNumber}"
                      >
                         ${contentEl}
                 </div>`;
+    }
+
+    populatePlaceholderEmptyDivs() {
+        var html = '';
+        var placholderHeight = this.options.pageHeight;
+        var i;
+
+        for (i = (this.urlStartPage - 2) ; i > 0 ; i--) {
+            // check if local variable with height exists and update placholderHeight value
+            html = html + `<div class="placeHolderDiv" style="width: 100%; height: ${placholderHeight}px; position: relative;"></div>`;
+        }
+
+        this.$el.prepend(html);
     }
 
     initHeavenScroll() {
@@ -208,10 +201,15 @@ class HeavenScroll {
             } else {
                 pagesArray = [(this.urlStartPage - 1), this.urlStartPage, (this.urlStartPage + 1)];
             }
-            return this.loadPage('ini', pagesArray)
+
+            return this.loadPage('iniHeaven', pagesArray)
                 .then(() => {
                     // only if startPage is bigger than 3 it will update padding on start up
                     if (this.urlStartPage > 1) {
+                        if (this.urlStartPage > 2) {
+                            this.populatePlaceholderEmptyDivs();
+                        }
+
                         // scroll to page
                         setTimeout(function () {
                             var firstPage = document.getElementsByClassName(this.options.pageClassName)[1].getBoundingClientRect().top + window.scrollY;
@@ -222,16 +220,21 @@ class HeavenScroll {
                 });
         }
 
-        return this.loadPage('ini', this.urlStartPage);
+        return this.loadPage('iniHeaven', this.urlStartPage);
     }
 
     removePage(position) {
-        var pageHeight = pageHeight = $('.' + this.options.pageClassName + ':first-child').height();
+        var pageHeight;
+        var html;
+        var $page;
 
         if (position === 'first') {
-            $('.' + this.options.pageClassName + ':first-child').remove();
+            $page = this.$el.find('.' + this.options.pageClassName + ':first');
+            pageHeight = $page.height();
+            html = `<div class="placeHolderDiv" style="width: 100%; height: ${pageHeight}px; position: relative;"></div>`;
+            $page.replaceWith(html);
         } else if (position === 'last') {
-            $('.' + this.options.pageClassName + ':last-child').remove();
+            this.$el.find('.' + this.options.pageClassName + ':last').remove();
         }
     }
 
@@ -315,7 +318,7 @@ class HeavenScroll {
         var pagesLength;
 
         if (scrollDir === 'scrollUp') {
-            this.addSpinner('top');
+            // this.addSpinner('top');
             return this.loadPage('ini', (pageNumber - 1))
             .then(() => {
                 this.removePage('last');
