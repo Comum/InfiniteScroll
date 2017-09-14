@@ -11,8 +11,7 @@ var defaultOptions = {
     pageClassName: -1,
     urlQueryParamName: -1,
     loadPageFunction: function () {},
-    hasSpinner: false,
-    spinnerClassName: -1
+    spinnerClassName: 'Spinner'
 };
 
 var $window = $(window);
@@ -21,13 +20,27 @@ var $htmlBody = $('html, body');
 var screenHeight = $window.height();
 
 class HeavenScroll {
+    /*
+     * Initializes the plugin
+     *
+     * @param {String} el
+     * @param {Object} options
+     * @param {Integer} options.fadeInValue
+     * @param {Integer} options.pageHeight
+     * @param {Integer} options.maxPageNumber
+     * @param {Integer} options.startPage
+     * @param {Integer} options.endPage
+     * @param {Integer} options.pageClassName
+     * @param {Integer} options.urlQueryParamName
+     * @param {Function} options.loadPageFunction
+     * @param {String} options.spinnerClassName
+     */
     constructor(el, options) {
         this.el = el;
         this.$el = $(el);
         this.options = $.extend({}, defaultOptions, options) ;
 
         this.init();
-        this.initContainerOffset(); // used?
         this.urlHasStartPageInfo();
 
         this.updateUrlStartPageParam('');
@@ -93,17 +106,14 @@ class HeavenScroll {
         }
 
         this.isPageLoading = false;
-        // if this.urlStartPage is differnet than zero than url has startPage
         this.urlStartPage = 1;
         this.currentPage = 1;
         this.prevScroll = 0;
         this.firstRun = true;
         this.$pages = this.$el.find('.' + this.options.pageClassName);
         this.urlParams = [];
-    }
 
-    initContainerOffset() {
-        this.pagePlaceholder = this.$el.position().top;
+        this.$el.css('position', 'relative');
     }
 
     urlHasStartPageInfo() {
@@ -133,23 +143,36 @@ class HeavenScroll {
         }
     }
 
-    updateContainerPadding(paddingValue) {
-        this.$el.css('padding-top', paddingValue + 'px');
-    }
-
+    /**
+     * Returns the resolved promise when the html is added to the DOM
+     *
+     * @param {String} position
+     * @param {Integer} printPageNumber
+     */
     loadPage(position, printPageNumber) {
-        let args = {
+        let args;
+
+        args = {
             pageClassName: this.options.pageClassName,
             pageNumber: printPageNumber
         }
 
         return new Promise((resolve, reject) => {
-            this.options.loadPageFunction(args, (html) => {
+            this.loadPageFunction = this.options.loadPageFunction;
+            this.loadPageFunction(args, (html) => {
                 if (html !== '') {
-                    if (position === 'ini') {
+                    if (position === 'iniHeaven') {
                         $(html).hide().prependTo(this.$el).fadeIn(this.options.fadeInValue);
+                        
+                        if (this.urlStartPage === 1) {
+                            localStorage.setItem('listingPage1', this.$el.find('.' + this.options.pageClassName + ':first').height());
+                        }
+
                     } else if (position === 'end') {
                         $(html).hide().appendTo(this.$el).fadeIn(this.options.fadeInValue);
+                    } else if (position === 'ini') {
+                        $(html).hide().insertAfter('.placeHolderDiv:last').fadeIn(this.options.fadeInValue);
+                        this.$el.find('.placeHolderDiv:last').remove();
                     }
                 }
 
@@ -160,16 +183,61 @@ class HeavenScroll {
         });
     }
 
+    /**
+     * Returns the wraped html into a div
+     *
+     * @param {String} contentEl
+     * @param {Object} options
+     * @param {String} options.pageClassName
+     * @param {Integer} options.pageNumber
+     */
+    wrapHtmlPage(contentEl, options) {
+        return `<div
+                     class="${options.pageClassName}"
+                     style="
+                         position: relative;"
+                     data-page-number="${options.pageNumber}"
+                     >
+                        ${contentEl}
+                </div>`;
+    }
+
+    populatePlaceholderEmptyDivs() {
+        var html = '';
+        var placholderHeight;
+        var i;
+
+        for (i = 1 ; i <= (this.urlStartPage - 2) ; i++) {
+            placholderHeight = localStorage.getItem('listingPage' + i) || this.options.pageHeight;
+
+            html = html + `<div class="placeHolderDiv" style="width: 100%; height: ${placholderHeight}px; position: relative;"></div>`;
+        }
+
+        this.$el.prepend(html);
+    }
+
     initHeavenScroll() {
-        if (this.urlStartPage > 1) { // load 3 pages, 1 before and 1 after
-            return this.loadPage('ini', [(this.urlStartPage - 1), this.urlStartPage, (this.urlStartPage + 1)])
+        var pagesArray = [];
+
+        if (this.urlStartPage > 1) {
+            // load 3 pages, 1 before and 1 after
+            if (this.urlStartPage === this.options.endPage) {
+                pagesArray = [(this.urlStartPage - 1), this.urlStartPage];
+            } else {
+                pagesArray = [(this.urlStartPage - 1), this.urlStartPage, (this.urlStartPage + 1)];
+            }
+
+            return this.loadPage('iniHeaven', pagesArray)
                 .then(() => {
                     // only if startPage is bigger than 3 it will update padding on start up
                     if (this.urlStartPage > 1) {
-                        this.updateContainerPadding((this.urlStartPage - 2) * this.options.pageHeight);
+                        if (this.urlStartPage > 2) {
+                            this.populatePlaceholderEmptyDivs();
+                        }
+
                         // scroll to page
                         setTimeout(function () {
-                            var firstPage = document.getElementsByClassName(this.options.pageClassName)[1].getBoundingClientRect().top;
+                            var firstPage = document.getElementsByClassName(this.options.pageClassName)[1].getBoundingClientRect().top + window.scrollY;
 
                             $htmlBody.animate({ scrollTop: firstPage }, 0);
                         }.bind(this), 0);
@@ -177,19 +245,26 @@ class HeavenScroll {
                 });
         }
 
-        return this.loadPage('ini', this.urlStartPage);
+        return this.loadPage('iniHeaven', this.urlStartPage);
     }
 
+    /**
+     * Removes the first or last page
+     *
+     * @param {String} position
+     */
     removePage(position) {
-        var pageHeight = pageHeight = $('.' + this.options.pageClassName + ':first-child').height();
-        var containerPadding = parseInt(this.$el.css('padding-top'));
+        var pageHeight;
+        var html;
+        var $page;
 
         if (position === 'first') {
-            $('.' + this.options.pageClassName + ':first-child').remove();
-            this.updateContainerPadding(pageHeight + containerPadding);
+            $page = this.$el.find('.' + this.options.pageClassName + ':first');
+            pageHeight = $page.height();
+            html = `<div class="placeHolderDiv" style="width: 100%; height: ${pageHeight}px; position: relative;"></div>`;
+            $page.replaceWith(html);
         } else if (position === 'last') {
-            $('.' + this.options.pageClassName + ':last-child').remove();
-            this.updateContainerPadding(containerPadding - pageHeight);
+            this.$el.find('.' + this.options.pageClassName + ':last').remove();
         }
     }
 
@@ -200,14 +275,29 @@ class HeavenScroll {
         return (query.length > 2 ? query + "&" : "?") + (newval ? param + "=" + newval : '');
     }
 
+    /**
+     * Updates url current page parameter
+     *
+     * @param {Integer} pageNumber
+     */
     urlQueryParamValueUpdate(pageNumber) {
+        var pageHeight;
+
         if (this.urlParams.length > 1) {
             window.history.replaceState("", "", this.replaceQueryParam(this.options.urlQueryParamName, pageNumber, window.location.search));
         } else {
             window.history.replaceState("", "", '?' + this.options.urlQueryParamName + '=' + pageNumber, window.location.search);
         }
+
+        pageHeight = this.$el.find(`.${this.options.pageClassName}[data-page-number=${pageNumber}]`).height();
+        localStorage.setItem('listingPage' + pageNumber, pageHeight);
     }
 
+    /**
+     * Sets up to update url current page parameter
+     *
+     * @param {String} scrolligOption
+     */
     updateUrlStartPageParam(scrolligOption) {
         if (this.firstRun) {
             if (this.urlStartPage === 1) {
@@ -218,15 +308,15 @@ class HeavenScroll {
         }
 
         if (scrolligOption === 'down') {
-            if ($('[data-page-number=' + (this.currentPage + 1) + ']').length) {
-                if ($('[data-page-number=' + (this.currentPage + 1) + ']')[0].getBoundingClientRect().top < (screenHeight * 0.75)) {
+            if (this.$el.find('[data-page-number=' + (this.currentPage + 1) + ']').length) {
+                if (this.$el.find('[data-page-number=' + (this.currentPage + 1) + ']')[0].getBoundingClientRect().top < (screenHeight * 0.75)) {
                     this.currentPage++;
                     this.urlQueryParamValueUpdate(this.currentPage);
                 }
             }
         } else if (scrolligOption === 'up') {
-            if ($('[data-page-number=' + (this.currentPage - 1) + ']').length) {
-                if ($('[data-page-number=' + (this.currentPage - 1) + ']')[0].getBoundingClientRect().bottom > (screenHeight * 0.25)) {
+            if (this.$el.find('[data-page-number=' + (this.currentPage - 1) + ']').length) {
+                if (this.$el.find('[data-page-number=' + (this.currentPage - 1) + ']')[0].getBoundingClientRect().bottom > (screenHeight * 0.25)) {
                     this.currentPage--;
                     this.urlQueryParamValueUpdate(this.currentPage);
                 }
@@ -234,23 +324,86 @@ class HeavenScroll {
         }
     }
 
+    /**
+     * Adds the spinner
+     *
+     * @param {String} position
+     */
     addSpinner(position) {
-        var html = `<div class="${this.options.spinnerClassName}"></div>`;
+        var html;
+        var spinnerHeightPosition;
+        var $lastPage;
 
         if (position === 'top') {
+            spinnerHeightPosition = this.$el.find('.' + this.options.pageClassName + ':first').position().top;
+            html = `<div
+                        class="${this.options.spinnerClassName}"
+                        style="
+                            position: absolute;
+                            bottom: ${spinnerHeightPosition}px;
+                        ">
+                    </div>`;
             this.$el.prepend(html);
         } else if (position === 'bottom') {
+            $lastPage = this.$el.find('.' + this.options.pageClassName + ':last-child');
+            spinnerHeightPosition = $lastPage.position().top + $lastPage.outerHeight(true);
+            html = `<div
+                        class="${this.options.spinnerClassName}"
+                        style="
+                            position: absolute;
+                            top: ${spinnerHeightPosition}px;
+                        ">
+                    </div>`;
             this.$el.append(html);
         }
     }
 
-    removeSpinner() {
-        $('.' + this.options.spinnerClassName).remove();
+    /**
+     * Removes the spinner
+     *
+     * @param {Function} cb
+     */
+    removeSpinner(cb) {
+        return new Promise((resolve, reject) => {
+            $.when(this.$el.find('.' + this.options.spinnerClassName).remove()).done(() => resolve());
+        });
+    }
+
+    /**
+     * Sets up loading page status
+     *
+     * @param {String} scrollDir
+     * @param {Integer} pageNumber
+     */
+    loadingPage(scrollDir, pageNumber) {
+        var pagesLength;
+
+        if (scrollDir === 'scrollUp') {
+            this.addSpinner('top');
+            return this.loadPage('ini', (pageNumber - 1))
+            .then(() => {
+                this.removePage('last');
+                this.removeSpinner();
+            });
+        } else if (scrollDir === 'scrollDown') {
+            pagesLength = this.$el.find('.' + this.options.pageClassName).length;
+
+            this.addSpinner('bottom');
+            return this.loadPage('end', pageNumber)
+            .then(() => {
+                if (pagesLength >= this.options.maxPagesNumber) {
+                    this.removePage('first');
+                }
+                this.removeSpinner();
+            });
+        }
+
+        return Promise.resolve();
     }
 
     onScroll() {
         var pages = document.getElementsByClassName(this.options.pageClassName);
-        var pagesLength = $('.' + this.options.pageClassName).length;
+        var pageNumber;
 
         if (!this.isPageLoading) {
             this.scrollValue = $document.scrollTop();
@@ -260,33 +413,23 @@ class HeavenScroll {
                 if (((Math.abs(pages[0].getBoundingClientRect().top) - Math.abs(pages[0].getBoundingClientRect().bottom)) <= (screenHeight - 50)) && (pages[0].getAttribute('data-page-number') > 1)) {
                     this.isPageLoading = true;
 
-                    this.addSpinner('top');
-
-                    return this.loadPage('ini', (parseInt(pages[0].getAttribute('data-page-number')) - 1))
+                    pageNumber = parseInt(pages[0].getAttribute('data-page-number'));
+                    this.loadingPage('scrollUp', pageNumber)
                     .then(() => {
                         this.isPageLoading = false;
-                        if (pagesLength >= this.options.maxPagesNumber) {
-                            this.removePage('last');
-                        }
-                    })
-                    .finally( () => this.removeSpinner() );
+                    });
                 }
             } else if ((this.prevScroll < this.scrollValue) && (this.prevScroll !== 0)) { // scroll down
                 this.updateUrlStartPageParam('down');
 
                 if (((Math.abs(pages[(pages.length - 1)].getBoundingClientRect().bottom) - Math.abs(pages[(pages.length - 1)].getBoundingClientRect().top)) <= (screenHeight - 50)) && (this.currentPage < this.options.endPage)) {
                     this.isPageLoading = true;
-                    
-                    this.addSpinner('bottom');
 
-                    return this.loadPage('end', (parseInt(pages[(pages.length - 1)].getAttribute('data-page-number')) + 1))
+                    pageNumber = parseInt(pages[(pages.length - 1)].getAttribute('data-page-number')) + 1;
+                    this.loadingPage('scrollDown', pageNumber)
                     .then(() => {
                         this.isPageLoading = false;
-                        if (pagesLength >= this.options.maxPagesNumber) {
-                            this.removePage('first');
-                        }
-                    })
-                    .finally( () => this.removeSpinner() );
+                    });
                 }
             }
 
