@@ -20,6 +20,21 @@ var $htmlBody = $('html, body');
 var screenHeight = $window.height();
 
 class HeavenScroll {
+    /*
+     * Initializes the plugin
+     *
+     * @param {String} el
+     * @param {Object} options
+     * @param {Integer} options.fadeInValue
+     * @param {Integer} options.pageHeight
+     * @param {Integer} options.maxPageNumber
+     * @param {Integer} options.startPage
+     * @param {Integer} options.endPage
+     * @param {Integer} options.pageClassName
+     * @param {Integer} options.urlQueryParamName
+     * @param {Function} options.loadPageFunction
+     * @param {String} options.spinnerClassName
+     */
     constructor(el, options) {
         this.el = el;
         this.$el = $(el);
@@ -128,6 +143,12 @@ class HeavenScroll {
         }
     }
 
+    /**
+     * Returns the resolved promise when the html is added to the DOM
+     *
+     * @param {String} position
+     * @param {Integer} printPageNumber
+     */
     loadPage(position, printPageNumber) {
         let args;
 
@@ -162,6 +183,14 @@ class HeavenScroll {
         });
     }
 
+    /**
+     * Returns the wraped html into a div
+     *
+     * @param {String} contentEl
+     * @param {Object} options
+     * @param {String} options.pageClassName
+     * @param {Integer} options.pageNumber
+     */
     wrapHtmlPage(contentEl, options) {
         return `<div
                      class="${options.pageClassName}"
@@ -179,7 +208,6 @@ class HeavenScroll {
         var i;
 
         for (i = 1 ; i <= (this.urlStartPage - 2) ; i++) {
-            // check if local variable with height exists and update placholderHeight value
             placholderHeight = localStorage.getItem('listingPage' + i) || this.options.pageHeight;
 
             html = html + `<div class="placeHolderDiv" style="width: 100%; height: ${placholderHeight}px; position: relative;"></div>`;
@@ -220,6 +248,11 @@ class HeavenScroll {
         return this.loadPage('iniHeaven', this.urlStartPage);
     }
 
+    /**
+     * Removes the first or last page
+     *
+     * @param {String} position
+     */
     removePage(position) {
         var pageHeight;
         var html;
@@ -242,6 +275,11 @@ class HeavenScroll {
         return (query.length > 2 ? query + "&" : "?") + (newval ? param + "=" + newval : '');
     }
 
+    /**
+     * Updates url current page parameter
+     *
+     * @param {Integer} pageNumber
+     */
     urlQueryParamValueUpdate(pageNumber) {
         var pageHeight;
 
@@ -255,6 +293,11 @@ class HeavenScroll {
         localStorage.setItem('listingPage' + pageNumber, pageHeight);
     }
 
+    /**
+     * Sets up to update url current page parameter
+     *
+     * @param {String} scrolligOption
+     */
     updateUrlStartPageParam(scrolligOption) {
         if (this.firstRun) {
             if (this.urlStartPage === 1) {
@@ -281,6 +324,11 @@ class HeavenScroll {
         }
     }
 
+    /**
+     * Adds the spinner
+     *
+     * @param {String} position
+     */
     addSpinner(position) {
         var html;
         var spinnerHeightPosition;
@@ -310,12 +358,23 @@ class HeavenScroll {
         }
     }
 
+    /**
+     * Removes the spinner
+     *
+     * @param {Function} cb
+     */
     removeSpinner(cb) {
         return new Promise((resolve, reject) => {
             $.when(this.$el.find('.' + this.options.spinnerClassName).remove()).done(() => resolve());
         });
     }
 
+    /**
+     * Sets up loading page status
+     *
+     * @param {String} scrollDir
+     * @param {Integer} pageNumber
+     */
     loadingPage(scrollDir, pageNumber) {
         var pagesLength;
 

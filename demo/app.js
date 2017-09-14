@@ -6,6 +6,8 @@ import './style.scss';
 
 /**
  * Returns a string to be included in the html
+ *
+ * @param {Function} cb
  */
 function getQuote(cb) {
     $.ajax({
@@ -18,10 +20,11 @@ function getQuote(cb) {
 
 /**
  * Returns html to be written inside .pageSingle
- * @param {object} options
- * @param {string} options.pageClassName
- * @param {integer|array} options.pageNumber
- * @param {function} cb
+ *
+ * @param {Object} options
+ * @param {String} options.pageClassName
+ * @param {Integer|Array} options.pageNumber
+ * @param {Function} cb
  */
 function productTileFetcher(options, cb) {
 	getQuote((quote) => {
