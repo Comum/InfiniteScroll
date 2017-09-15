@@ -221,11 +221,10 @@ class HeavenScroll {
     }
 
     populatePlaceholderEmptyDivs() {
-        var html = '';
-        var placholderHeight;
-        var i;
+        let html = '';
+        let placholderHeight;
 
-        for (i = 1 ; i <= (this.urlStartPage - 2) ; i++) {
+        for (let i = 1 ; i <= (this.urlStartPage - 2) ; i++) {
             placholderHeight = localStorage.getItem('listingPage' + i) || this.options.pageHeight;
 
             html = html + `<div class="placeHolderDiv" style="width: 100%; height: ${placholderHeight}px; position: relative;"></div>`;
@@ -235,7 +234,7 @@ class HeavenScroll {
     }
 
     initHeavenScroll() {
-        var pagesArray = [];
+        let pagesArray = [];
 
         if (this.urlStartPage > 1) {
             // load 3 pages, 1 before and 1 after
