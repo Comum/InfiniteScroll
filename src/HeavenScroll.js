@@ -69,7 +69,7 @@ class HeavenScroll {
             if (this.$el.data('pageHeight')) {
                 this.options.pageHeight = this.$el.data('pageHeight');
             } else {
-                this.options.pageHeight = 1584;
+                this.options.pageHeight = screenHeight * 1.2;
             }
         }
 
