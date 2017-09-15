@@ -45,7 +45,7 @@ class HeavenScroll {
 
         this.updateUrlStartPageParam('');
         this.initHeavenScroll();
-        $window.on('scroll', () => this.onScroll());
+        $window.on('scroll', this.onScroll.bind(this));
     }
 
     init() {
