@@ -236,33 +236,35 @@ class HeavenScroll {
     initHeavenScroll() {
         let pagesArray = [];
 
-        if (this.urlStartPage > 1) {
-            // load 3 pages, 1 before and 1 after
-            if (this.urlStartPage === this.options.endPage) {
-                pagesArray = [(this.urlStartPage - 1), this.urlStartPage];
-            } else {
-                pagesArray = [(this.urlStartPage - 1), this.urlStartPage, (this.urlStartPage + 1)];
-            }
-
-            return this.loadPage('iniHeaven', pagesArray)
-                .then(() => {
-                    // only if startPage is bigger than 3 it will update padding on start up
-                    if (this.urlStartPage > 1) {
-                        if (this.urlStartPage > 2) {
-                            this.populatePlaceholderEmptyDivs();
-                        }
-
-                        // scroll to page
-                        setTimeout(function () {
-                            var firstPage = document.getElementsByClassName(this.options.pageClassName)[1].getBoundingClientRect().top + window.scrollY;
-
-                            $htmlBody.animate({ scrollTop: firstPage }, 0);
-                        }.bind(this), 0);
-                    }
-                });
+        if (this.urlStartPage <= 1) {
+            return this.loadPage('iniHeaven', this.urlStartPage);
         }
 
-        return this.loadPage('iniHeaven', this.urlStartPage);
+        // load 3 pages, 1 before and 1 after
+        if (this.urlStartPage === this.options.endPage) {
+            pagesArray = [(this.urlStartPage - 1), this.urlStartPage];
+        } else {
+            pagesArray = [(this.urlStartPage - 1), this.urlStartPage, (this.urlStartPage + 1)];
+        }
+
+        return this.loadPage('iniHeaven', pagesArray)
+            .then(() => {
+                // only if startPage is bigger than 3 it will update padding on start up
+                if (this.urlStartPage > 1) {
+                    if (this.urlStartPage > 2) {
+                        this.populatePlaceholderEmptyDivs();
+                    }
+
+                    // scroll to page
+                    setTimeout(() => {
+                        let firstPage = document
+                                        .getElementsByClassName(this.options.pageClassName)[1]
+                                        .getBoundingClientRect().top + window.scrollY;
+
+                        $htmlBody.animate({ scrollTop: firstPage }, 0);
+                    }, 0);
+                }
+            });
     }
 
     /**
