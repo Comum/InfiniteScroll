@@ -160,26 +160,36 @@ class HeavenScroll {
         }
 
         return new Promise((resolve, reject) => {
+            // NOTE: the function needs to be reassigned because it loses scope when behind called with the callback 
             this.loadPageFunction = this.options.loadPageFunction;
             this.loadPageFunction(args, (html) => {
-                if (html !== '') {
-                    if (position === 'iniHeaven') {
-                        $(html).hide().prependTo(this.$el).fadeIn(this.options.fadeInValue);
-                        
-                        if (this.urlStartPage === 1) {
-                            localStorage.setItem('listingPage1', this.$el.find('.' + this.options.pageClassName + ':first').height());
-                        }
+                var realHtml;
 
-                    } else if (position === 'end') {
-                        $(html).hide().appendTo(this.$el).fadeIn(this.options.fadeInValue);
-                    } else if (position === 'ini') {
-                        $(html).hide().insertAfter('.placeHolderDiv:last').fadeIn(this.options.fadeInValue);
-                        this.$el.find('.placeHolderDiv:last').remove();
+                // check if this.wrapHtmlPage() is called in implemented (by 'user') function
+                if (typeof html === 'undefined' || !html) {
+                    realHtml = this.wrapHtmlPage(`<p class="errorLoadingPageMessage">Error Loading Page</p>`, args);
+                } else if (html.match(this.options.pageClassName)) {
+                    realHtml = html;
+                }
+                else {
+                    realHtml = this.wrapHtmlPage(html, args);   
+                }
+
+                if (position === 'iniHeaven') {
+                    $(realHtml).hide().prependTo(this.$el).fadeIn(this.options.fadeInValue);
+                    
+                    if (this.urlStartPage === 1) {
+                        localStorage.setItem('listingPage1', this.$el.find('.' + this.options.pageClassName + ':first').height());
                     }
+
+                } else if (position === 'end') {
+                    $(realHtml).hide().appendTo(this.$el).fadeIn(this.options.fadeInValue);
+                } else if (position === 'ini') {
+                    $(realHtml).hide().insertAfter('.placeHolderDiv:last').fadeIn(this.options.fadeInValue);
+                    this.$el.find('.placeHolderDiv:last').remove();
                 }
 
                 this.$pages = this.$el.find('.' + this.options.pageClassName);
-
                 resolve();
             });
         });
@@ -194,13 +204,19 @@ class HeavenScroll {
      * @param {Integer} options.pageNumber
      */
     wrapHtmlPage(contentEl, options) {
+        var htmlNewContent = contentEl;
+
+        if (typeof contentEl === 'undefined' || !contentEl) {
+            htmlNewContent = `<p class="errorLoadingPageMessage">Error Loading Page</p>`;
+        }
+
         return `<div
                      class="${options.pageClassName}"
                      style="
                          position: relative;"
                      data-page-number="${options.pageNumber}"
                      >
-                        ${contentEl}
+                        ${htmlNewContent}
                 </div>`;
     }
 
