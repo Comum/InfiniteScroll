@@ -121,25 +121,27 @@ class HeavenScroll {
             .attr('href')
             .split('?');
 
-        if (this.urlParams.length > 1) {
-            if (this.urlParams[1].indexOf(this.options.urlQueryParamName) !== -1) {
-                this.urlParams[1]
-                    .split('&')
-                    .forEach(function (arg) {
-                        var pageValue;
+        if (this.urlParams.length <= 1) {
+            return;
+        }
 
-                        if (arg.indexOf(this.options.urlQueryParamName) !== -1) {
-                            pageValue = parseInt(arg.split('=')[1], 10);
-                            if ((pageValue > 1) && (pageValue <= this.options.endPage)) {
-                                this.urlStartPage = parseInt(arg.split('=')[1], 10);
-                            } else if ((pageValue > 1) && (pageValue > this.options.endPage)){
-                                this.urlStartPage = this.options.endPage;
-                            }
-                            this.currentPage = this.urlStartPage;
-                            return;
+        if (this.urlParams[1].match(this.options.urlQueryParamName)) {
+            this.urlParams[1]
+                .split('&')
+                .forEach((arg) => {
+                    var pageValue;
+
+                    if (arg.indexOf(this.options.urlQueryParamName) !== -1) {
+                        pageValue = parseInt(arg.split('=')[1], 10);
+                        if ((pageValue > 1) && (pageValue <= this.options.endPage)) {
+                            this.urlStartPage = parseInt(arg.split('=')[1], 10);
+                        } else if ((pageValue > 1) && (pageValue > this.options.endPage)){
+                            this.urlStartPage = this.options.endPage;
                         }
-                    }.bind(this));
-            }
+                        this.currentPage = this.urlStartPage;
+                        return;
+                    }
+                });
         }
     }
 
