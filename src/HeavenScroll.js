@@ -14,10 +14,10 @@ var defaultOptions = {
     spinnerClassName: 'Spinner'
 };
 
-var $window = $(window);
-var $document = $(document);
-var $htmlBody = $('html, body');
-var screenHeight = $window.height();
+const $window = $(window);
+const $document = $(document);
+const $htmlBody = $('html, body');
+const screenHeight = $window.height();
 
 class HeavenScroll {
     /*
