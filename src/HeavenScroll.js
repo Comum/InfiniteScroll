@@ -196,7 +196,7 @@ class HeavenScroll {
     }
 
     /**
-     * Returns the wraped html into a div
+     * Returns the wrapped html into a div
      *
      * @param {String} contentEl
      * @param {Object} options
