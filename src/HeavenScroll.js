@@ -273,9 +273,9 @@ class HeavenScroll {
      * @param {String} position
      */
     removePage(position) {
-        var pageHeight;
-        var html;
-        var $page;
+        let pageHeight;
+        let html;
+        let $page;
 
         if (position === 'first') {
             $page = this.$el.find('.' + this.options.pageClassName + ':first');
@@ -301,11 +301,20 @@ class HeavenScroll {
      */
     urlQueryParamValueUpdate(pageNumber) {
         var pageHeight;
+        var urlParam;
 
         if (this.urlParams.length > 1) {
-            window.history.replaceState("", "", this.replaceQueryParam(this.options.urlQueryParamName, pageNumber, window.location.search));
+            urlParam = this.replaceQueryParam(this.options.urlQueryParamName, pageNumber, window.location.search);
+
+            window
+                .history
+                .replaceState("", "", urlParam);
         } else {
-            window.history.replaceState("", "", '?' + this.options.urlQueryParamName + '=' + pageNumber, window.location.search);
+            urlParam = '?' + this.options.urlQueryParamName + '=' + pageNumber;
+            
+            window
+                .history
+                .replaceState("", "", urlParam, window.location.search);
         }
 
         pageHeight = this.$el.find(`.${this.options.pageClassName}[data-page-number=${pageNumber}]`).height();
