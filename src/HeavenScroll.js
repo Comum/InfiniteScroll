@@ -331,6 +331,10 @@ class HeavenScroll {
      * @param {String} scrolligOption
      */
     updateUrlStartPageParam(scrolligOption) {
+        let $dataPageNumber;
+        let pageTriggerPosition;
+        let screenTrigger;
+
         if (this.firstRun) {
             if (this.urlStartPage === 1) {
                 this.urlQueryParamValueUpdate(this.urlStartPage);
@@ -338,6 +342,32 @@ class HeavenScroll {
 
             this.firstRun = false;
         }
+
+        /*if (scrolligOption === 'down') {
+            $dataPageNumber = this.$el.find('[data-page-number=' + (this.currentPage + 1) + ']');
+            pageTriggerPosition = $dataPageNumber[0].getBoundingClientRect().top;
+            screenTrigger = screenHeight * 0.75;
+
+            if ($dataPageNumber.length) {
+                if (pageTriggerPosition < screenTrigger) {
+                    this.currentPage++;
+                    this.urlQueryParamValueUpdate(this.currentPage);
+                }
+            }
+        } else if (scrolligOption === 'up') {
+            $dataPageNumber = this.$el.find('[data-page-number=' + (this.currentPage + 1) + ']');
+            pageTriggerPosition = $dataPageNumber[0].getBoundingClientRect().bottom;
+            screenTrigger = screenHeight * 0.25;
+
+            if ($dataPageNumber.length) {
+                if (pageTriggerPosition > screenTrigger) {
+                    this.currentPage--;
+                    this.urlQueryParamValueUpdate(this.currentPage);
+                }
+            }
+        } else if (scrolligOption !== '') {
+            console.error('updateUrlStartPageParam(scrolligOption): "' + scrolligOption + '" is not a valid argument.');
+        }*/
 
         if (scrolligOption === 'down') {
             if (this.$el.find('[data-page-number=' + (this.currentPage + 1) + ']').length) {
