@@ -129,7 +129,7 @@ class HeavenScroll {
             this.urlParams[1]
                 .split('&')
                 .forEach((arg) => {
-                    var pageValue;
+                    let pageValue;
 
                     if (arg.indexOf(this.options.urlQueryParamName) !== -1) {
                         pageValue = parseInt(arg.split('=')[1], 10);
@@ -163,7 +163,7 @@ class HeavenScroll {
             // NOTE: the function needs to be reassigned because it loses scope when behind called with the callback 
             this.loadPageFunction = this.options.loadPageFunction;
             this.loadPageFunction(args, (html) => {
-                var realHtml;
+                let realHtml;
 
                 // check if this.wrapHtmlPage() is called in implemented (by 'user') function
                 if (typeof html === 'undefined' || !html) {
@@ -206,7 +206,7 @@ class HeavenScroll {
      * @param {Integer} options.pageNumber
      */
     wrapHtmlPage(contentEl, options) {
-        var htmlNewContent = contentEl;
+        let htmlNewContent = contentEl;
 
         if (typeof contentEl === 'undefined' || !contentEl) {
             htmlNewContent = `<p class="errorLoadingPageMessage">Error Loading Page</p>`;
@@ -292,8 +292,8 @@ class HeavenScroll {
     }
 
     replaceQueryParam(param, newval, search) {
-        var regex = new RegExp("([?;&])" + param + "[^&;]*[;&]?");
-        var query = search.replace(regex, "$1").replace(/&$/, '');
+        let regex = new RegExp("([?;&])" + param + "[^&;]*[;&]?");
+        let query = search.replace(regex, "$1").replace(/&$/, '');
 
         return (query.length > 2 ? query + "&" : "?") + (newval ? param + "=" + newval : '');
     }
@@ -304,8 +304,8 @@ class HeavenScroll {
      * @param {Integer} pageNumber
      */
     urlQueryParamValueUpdate(pageNumber) {
-        var pageHeight;
-        var urlParam;
+        let pageHeight;
+        let urlParam;
 
         if (this.urlParams.length > 1) {
             urlParam = this.replaceQueryParam(this.options.urlQueryParamName, pageNumber, window.location.search);
@@ -378,9 +378,9 @@ class HeavenScroll {
      * @param {String} position
      */
     addSpinner(position) {
-        var html;
-        var spinnerHeightPosition;
-        var $lastPage;
+        let html;
+        let spinnerHeightPosition;
+        let $lastPage;
 
         if (position === 'top') {
             spinnerHeightPosition = this.$el.find('.' + this.options.pageClassName + ':first').position().top;
@@ -424,7 +424,7 @@ class HeavenScroll {
      * @param {Integer} pageNumber
      */
     loadingPage(scrollDir, pageNumber) {
-        var pagesLength;
+        let pagesLength;
 
         if (scrollDir === 'scrollUp') {
             this.addSpinner('top');
@@ -483,7 +483,7 @@ class HeavenScroll {
                 if (((pageBottomPosition - pageTopPosition) <= screenTrigger) && (this.currentPage < this.options.endPage)) {
                     this.isPageLoading = true;
                     pageNumber = parseInt(pages[(pages.length - 1)].getAttribute('data-page-number')) + 1;
-                    
+
                     this.loadingPage('scrollDown', pageNumber)
                     .then(() => {
                         this.isPageLoading = false;
