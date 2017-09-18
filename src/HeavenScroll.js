@@ -187,6 +187,8 @@ class HeavenScroll {
                 } else if (position === 'ini') {
                     $(realHtml).hide().insertAfter('.placeHolderDiv:last').fadeIn(this.options.fadeInValue);
                     this.$el.find('.placeHolderDiv:last').remove();
+                } else {
+                    console.error('loadPage(position, printPageNumber): "' + position + '" is not a valid argument.');
                 }
 
                 this.$pages = this.$el.find('.' + this.options.pageClassName);
@@ -233,7 +235,7 @@ class HeavenScroll {
         this.$el.prepend(html);
     }
 
-    initHeavenScroll() {
+    initHeavenScroll() { 
         let pagesArray = [];
 
         if (this.urlStartPage <= 1) {
@@ -284,6 +286,8 @@ class HeavenScroll {
             $page.replaceWith(html);
         } else if (position === 'last') {
             this.$el.find('.' + this.options.pageClassName + ':last').remove();
+        } else {
+            console.error('removePage(position): "' + position + '" is not a valid argument.');
         }
     }
 
@@ -311,7 +315,7 @@ class HeavenScroll {
                 .replaceState("", "", urlParam);
         } else {
             urlParam = '?' + this.options.urlQueryParamName + '=' + pageNumber;
-            
+
             window
                 .history
                 .replaceState("", "", urlParam, window.location.search);
@@ -349,6 +353,8 @@ class HeavenScroll {
                     this.urlQueryParamValueUpdate(this.currentPage);
                 }
             }
+        } else if (scrolligOption !== '') {
+            console.error('updateUrlStartPageParam(scrolligOption): "' + scrolligOption + '" is not a valid argument.');
         }
     }
 
@@ -424,6 +430,8 @@ class HeavenScroll {
                 }
                 this.removeSpinner();
             });
+        } else {
+            console.error('loadingPage(scrollDir, pageNumber): "' + scrollDir + '" is not a valid argument.');
         }
 
         return Promise.resolve();
