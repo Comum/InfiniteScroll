@@ -343,42 +343,26 @@ class HeavenScroll {
             this.firstRun = false;
         }
 
-        /*if (scrolligOption === 'down') {
+        if (scrolligOption === 'down') {
             $dataPageNumber = this.$el.find('[data-page-number=' + (this.currentPage + 1) + ']');
-            pageTriggerPosition = $dataPageNumber[0].getBoundingClientRect().top;
             screenTrigger = screenHeight * 0.75;
 
             if ($dataPageNumber.length) {
+                pageTriggerPosition = $dataPageNumber[0].getBoundingClientRect().top;
+                
                 if (pageTriggerPosition < screenTrigger) {
                     this.currentPage++;
                     this.urlQueryParamValueUpdate(this.currentPage);
                 }
             }
         } else if (scrolligOption === 'up') {
-            $dataPageNumber = this.$el.find('[data-page-number=' + (this.currentPage + 1) + ']');
-            pageTriggerPosition = $dataPageNumber[0].getBoundingClientRect().bottom;
+            $dataPageNumber = this.$el.find('[data-page-number=' + (this.currentPage - 1) + ']');
             screenTrigger = screenHeight * 0.25;
 
             if ($dataPageNumber.length) {
-                if (pageTriggerPosition > screenTrigger) {
-                    this.currentPage--;
-                    this.urlQueryParamValueUpdate(this.currentPage);
-                }
-            }
-        } else if (scrolligOption !== '') {
-            console.error('updateUrlStartPageParam(scrolligOption): "' + scrolligOption + '" is not a valid argument.');
-        }*/
+                pageTriggerPosition = $dataPageNumber[0].getBoundingClientRect().bottom;
 
-        if (scrolligOption === 'down') {
-            if (this.$el.find('[data-page-number=' + (this.currentPage + 1) + ']').length) {
-                if (this.$el.find('[data-page-number=' + (this.currentPage + 1) + ']')[0].getBoundingClientRect().top < (screenHeight * 0.75)) {
-                    this.currentPage++;
-                    this.urlQueryParamValueUpdate(this.currentPage);
-                }
-            }
-        } else if (scrolligOption === 'up') {
-            if (this.$el.find('[data-page-number=' + (this.currentPage - 1) + ']').length) {
-                if (this.$el.find('[data-page-number=' + (this.currentPage - 1) + ']')[0].getBoundingClientRect().bottom > (screenHeight * 0.25)) {
+                if (pageTriggerPosition > screenTrigger) {
                     this.currentPage--;
                     this.urlQueryParamValueUpdate(this.currentPage);
                 }
@@ -468,18 +452,24 @@ class HeavenScroll {
     }
 
     onScroll() {
-        var pages = document.getElementsByClassName(this.options.pageClassName);
-        var pageNumber;
+        let pages = document.getElementsByClassName(this.options.pageClassName);
+        let pageNumber;
+        let pageTopPosition;
+        let pageBottomPosition;
+        const screenTrigger = screenHeight - 50;
 
         if (!this.isPageLoading) {
             this.scrollValue = $document.scrollTop();
 
             if (this.prevScroll > this.scrollValue) { // scroll up
                 this.updateUrlStartPageParam('up');
-                if (((Math.abs(pages[0].getBoundingClientRect().top) - Math.abs(pages[0].getBoundingClientRect().bottom)) <= (screenHeight - 50)) && (pages[0].getAttribute('data-page-number') > 1)) {
+                pageTopPosition = Math.abs(pages[0].getBoundingClientRect().top);
+                pageBottomPosition = Math.abs(pages[0].getBoundingClientRect().bottom);
+                pageNumber = parseInt(pages[0].getAttribute('data-page-number'));
+
+                if (((pageTopPosition - pageBottomPosition) <= screenTrigger) && (pageNumber > 1)) {
                     this.isPageLoading = true;
 
-                    pageNumber = parseInt(pages[0].getAttribute('data-page-number'));
                     this.loadingPage('scrollUp', pageNumber)
                     .then(() => {
                         this.isPageLoading = false;
@@ -487,11 +477,13 @@ class HeavenScroll {
                 }
             } else if ((this.prevScroll < this.scrollValue) && (this.prevScroll !== 0)) { // scroll down
                 this.updateUrlStartPageParam('down');
+                pageTopPosition = Math.abs(pages[(pages.length - 1)].getBoundingClientRect().top);
+                pageBottomPosition = Math.abs(pages[(pages.length - 1)].getBoundingClientRect().bottom);
 
-                if (((Math.abs(pages[(pages.length - 1)].getBoundingClientRect().bottom) - Math.abs(pages[(pages.length - 1)].getBoundingClientRect().top)) <= (screenHeight - 50)) && (this.currentPage < this.options.endPage)) {
+                if (((pageBottomPosition - pageTopPosition) <= screenTrigger) && (this.currentPage < this.options.endPage)) {
                     this.isPageLoading = true;
-
                     pageNumber = parseInt(pages[(pages.length - 1)].getAttribute('data-page-number')) + 1;
+                    
                     this.loadingPage('scrollDown', pageNumber)
                     .then(() => {
                         this.isPageLoading = false;
