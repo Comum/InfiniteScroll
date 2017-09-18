@@ -258,9 +258,11 @@ class HeavenScroll {
 
                     // scroll to page
                     setTimeout(() => {
-                        let firstPage = document
-                                        .getElementsByClassName(this.options.pageClassName)[1]
-                                        .getBoundingClientRect().top + window.scrollY;
+                        let firstPage = this
+                            .$el
+                            .find('.' + this.options.pageClassName + ':eq(1)')
+                            .position()
+                            .top;
 
                         $htmlBody.animate({ scrollTop: firstPage }, 0);
                     }, 0);
