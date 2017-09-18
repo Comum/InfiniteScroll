@@ -170,8 +170,7 @@ class HeavenScroll {
                     realHtml = this.wrapHtmlPage(`<p class="errorLoadingPageMessage">Error Loading Page</p>`, args);
                 } else if (html.match(this.options.pageClassName)) {
                     realHtml = html;
-                }
-                else {
+                } else {
                     realHtml = this.wrapHtmlPage(html, args);   
                 }
 
