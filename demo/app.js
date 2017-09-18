@@ -27,6 +27,9 @@ function getQuote(cb) {
  * @param {Function} cb
  */
 function productTileFetcher(options, cb) {
+    // NOTE: take into account the screen height when loading page
+    // and setting default page height (when calling the plugin)
+    
 	getQuote((quote) => {
         var html;
 
