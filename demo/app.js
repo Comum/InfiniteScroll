@@ -51,7 +51,7 @@ function productTileFetcher(options, cb) {
 
 $(document).ready(function () {
     $('.pagesContainer').heavenScroll({
-    	fadeInValue: 1500,
+    	fadeInValue: 750,
         maxPagesNumber: 3,
         pageHeight: 1584,
         startPage: 1,
@@ -59,6 +59,7 @@ $(document).ready(function () {
         pageClassName: 'pageSingle',
         urlQueryParamName: 'startPage',
         loadPageFunction: productTileFetcher,
-        spinnerClassName: 'Spinner'
+        spinnerClassName: 'Spinner',
+        throttleValue: 100
     });
 });
