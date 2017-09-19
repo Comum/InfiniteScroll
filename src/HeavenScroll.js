@@ -160,7 +160,7 @@ class HeavenScroll {
         }
 
         return new Promise((resolve, reject) => {
-            // NOTE: the function needs to be reassigned because it loses scope when behind called with the callback 
+            // NOTE: the function needs to be reassigned because it loses scope when it is called with the callback 
             this.loadPageFunction = this.options.loadPageFunction;
             this.loadPageFunction(args, (html) => {
                 let realHtml;
