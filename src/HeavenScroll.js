@@ -182,10 +182,11 @@ class HeavenScroll {
                     }
 
                 } else if (position === 'end') {
-                    $(realHtml).hide().appendTo(this.$el).fadeIn(this.options.fadeInValue);
+                    $(realHtml).hide().insertAfter('.' + this.options.pageClassName + ':last').fadeIn(this.options.fadeInValue);
+                    this.$el.find('.afterPlaceHolderDiv:first').remove();
                 } else if (position === 'ini') {
-                    $(realHtml).hide().insertAfter('.placeHolderDiv:last').fadeIn(this.options.fadeInValue);
-                    this.$el.find('.placeHolderDiv:last').remove();
+                    $(realHtml).hide().insertBefore('.' + this.options.pageClassName + ':first').fadeIn(this.options.fadeInValue);
+                    this.$el.find('.beforePlaceHolderDiv:last').remove();
                 } else {
                     console.error('loadPage(position, printPageNumber): "' + position + '" is not a valid argument.');
                 }
@@ -228,7 +229,7 @@ class HeavenScroll {
         for (let i = 1 ; i <= (this.urlStartPage - 2) ; i++) {
             placholderHeight = localStorage.getItem('listingPage' + i) || this.options.pageHeight;
 
-            html = html + `<div class="placeHolderDiv" style="width: 100%; height: ${placholderHeight}px; position: relative;"></div>`;
+            html = html + `<div class="beforePlaceHolderDiv" style="width: 100%; height: ${placholderHeight}px; position: relative;"></div>`;
         }
 
         this.$el.prepend(html);
@@ -280,15 +281,20 @@ class HeavenScroll {
         let html;
         let $page;
 
-        if (position === 'first') {
-            $page = this.$el.find('.' + this.options.pageClassName + ':first');
-            pageHeight = $page.height();
-            html = `<div class="placeHolderDiv" style="width: 100%; height: ${pageHeight}px; position: relative;"></div>`;
-            $page.replaceWith(html);
-        } else if (position === 'last') {
-            this.$el.find('.' + this.options.pageClassName + ':last').remove();
-        } else {
+        if ((position !== 'first') && (position !== 'last')) {
             console.error('removePage(position): "' + position + '" is not a valid argument.');
+        } else {
+            if (position === 'first') {
+                $page = this.$el.find('.' + this.options.pageClassName + ':first');
+                pageHeight = $page.height();
+                html = `<div class="beforePlaceHolderDiv" style="width: 100%; height: ${pageHeight}px; position: relative;"></div>`;
+            } else if (position === 'last') {
+                $page = this.$el.find('.' + this.options.pageClassName + ':last');
+                pageHeight = $page.height();
+                html = `<div class="afterPlaceHolderDiv" style="width: 100%; height: ${pageHeight}px; position: relative;"></div>`;
+            }
+
+            $page.replaceWith(html);
         }
     }
 
@@ -394,7 +400,7 @@ class HeavenScroll {
                     </div>`;
             this.$el.prepend(html);
         } else if (position === 'bottom') {
-            $lastPage = this.$el.find('.' + this.options.pageClassName + ':last-child');
+            $lastPage = this.$el.find('.' + this.options.pageClassName + ':last');
             spinnerHeightPosition = $lastPage.position().top + $lastPage.outerHeight(true);
             html = `<div
                         class="${this.options.spinnerClassName}"
