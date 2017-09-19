@@ -11,7 +11,8 @@ var defaultOptions = {
     pageClassName: -1,
     urlQueryParamName: -1,
     loadPageFunction: function () {},
-    spinnerClassName: 'Spinner'
+    spinnerClassName: 'Spinner',
+    throttleValue: 100
 };
 
 const $window = $(window);
@@ -34,6 +35,7 @@ class HeavenScroll {
      * @param {Integer} options.urlQueryParamName
      * @param {Function} options.loadPageFunction
      * @param {String} options.spinnerClassName
+     * @param {Integer} options.throttleValue
      */
     constructor(el, options) {
         this.el = el;
@@ -45,7 +47,7 @@ class HeavenScroll {
 
         this.updateUrlStartPageParam('');
         this.initHeavenScroll();
-        $window.on('scroll', this.onScroll.bind(this));
+        $window.on('scroll', _.throttle(this.onScroll.bind(this), this.options.throttleValue));
     }
 
     init() {
@@ -102,6 +104,14 @@ class HeavenScroll {
                 this.options.urlQueryParamName = this.$el.data('urlQueryParamName');
             } else {
                 this.options.urlQueryParamName = 'startPage';
+            }
+        }
+
+        if (this.options.throttleValue === -1) {
+            if (this.$el.data('throttleValue')) {
+                this.options.throttleValue = this.$el.data('throttleValue');
+            } else {
+                this.options.throttleValue = 100;
             }
         }
 
