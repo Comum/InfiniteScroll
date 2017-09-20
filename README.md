@@ -70,7 +70,7 @@ $pagesContainer.heavenScroll({
 		pageClassName: 'pageSingle', // page class
 		urlQueryParamName: 'startPage', // page to start url query parameter name
 		loadPageFunction: productTileFetcher,  // function that returns the html to be shown
-		spinnerClassName: 'Spinner' // default class name 'Spinner'
+		spinnerClassName: 'Spinner', // default class name 'Spinner'
 		throttleValue: 100 // default throttle value
     });
 ```
