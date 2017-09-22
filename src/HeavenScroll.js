@@ -395,32 +395,21 @@ class HeavenScroll {
      * @param {String} position
      */
     addSpinner(position) {
-        let html;
+        let html = `<div class="${this.options.spinnerClassName} show"></div>`;
         let spinnerHeightPosition;
-        let $lastPage;
+        let $page;
 
-        if (position === 'top') {
-            spinnerHeightPosition = this.$el.find('.' + this.options.pageClassName + ':first').position().top;
-            html = `<div
-                        class="${this.options.spinnerClassName}"
-                        style="
-                            position: absolute;
-                            bottom: ${spinnerHeightPosition}px;
-                        ">
-                    </div>`;
-            this.$el.prepend(html);
-        } else if (position === 'bottom') {
-            $lastPage = this.$el.find('.' + this.options.pageClassName + ':last');
-            spinnerHeightPosition = $lastPage.position().top + $lastPage.outerHeight(true);
-            html = `<div
-                        class="${this.options.spinnerClassName}"
-                        style="
-                            position: absolute;
-                            top: ${spinnerHeightPosition}px;
-                        ">
-                    </div>`;
-            this.$el.append(html);
-        }
+        return new Promise((resolve, reject) => {
+            if (position === 'top') {
+                $page = this.$el.find('.' + this.options.pageClassName + ':first');
+                $(html).insertBefore($page);
+                resolve();
+            } else if (position === 'bottom') {
+                $page = this.$el.find('.' + this.options.pageClassName + ':last');
+                $(html).insertAfter($page);
+                resolve();
+            }
+        });
     }
 
     /**
@@ -429,9 +418,11 @@ class HeavenScroll {
      * @param {Function} cb
      */
     removeSpinner(cb) {
-        return new Promise((resolve, reject) => {
-            $.when(this.$el.find('.' + this.options.spinnerClassName).remove()).done(() => resolve());
-        });
+        // return new Promise((resolve, reject) => {
+        //     $.when(this.$el.find('.' + this.options.spinnerClassName).remove()).done(() => resolve());
+        // });
+        console.log($('.' + this.options.spinnerClassName))
+        $('.' + this.options.spinnerClassName).remove();
     }
 
     /**
@@ -441,29 +432,33 @@ class HeavenScroll {
      * @param {Integer} pageNumber
      */
     loadingPage(scrollDir, pageNumber) {
-        let pagesLength;
+        let pagesLength = this.$el.find('.' + this.options.pageClassName).length;
+        let spinnerPosition = 'top';
+        let loadPagePosition = 'ini';
+        let removePagePositon = 'last';
+        let pageToLoad = (pageNumber - 1);
 
-        if (scrollDir === 'scrollUp') {
-            this.addSpinner('top');
-            return this.loadPage('ini', (pageNumber - 1))
-            .then(() => {
-                this.removePage('last');
-                this.removeSpinner();
-            });
-        } else if (scrollDir === 'scrollDown') {
-            pagesLength = this.$el.find('.' + this.options.pageClassName).length;
-
-            this.addSpinner('bottom');
-            return this.loadPage('end', pageNumber)
-            .then(() => {
-                if (pagesLength >= this.options.maxPagesNumber) {
-                    this.removePage('first');
-                }
-                this.removeSpinner();
-            });
-        } else {
-            console.error('loadingPage(scrollDir, pageNumber): "' + scrollDir + '" is not a valid argument.');
+        if (scrollDir === 'scrollDown') {
+            spinnerPosition = 'bottom';
+            loadPagePosition = 'end';
+            removePagePositon = 'first';
+            pageToLoad = pageNumber;
+        } else if(scrollDir !== 'scrollUp') {
+            return Promise.reject(console.error('loadingPage(scrollDir, pageNumber): "' + scrollDir + '" is not a valid argument.'));
         }
+        
+        return this.addSpinner(spinnerPosition)
+        .then(() => {
+            return this.loadPage(loadPagePosition, pageToLoad)
+        })
+        .then(() => {
+            if (pagesLength >= this.options.maxPagesNumber) {
+                this.removePage(removePagePositon);
+            }
+        })
+        .then(() => {
+            this.removeSpinner();
+        });
 
         return Promise.resolve();
     }
@@ -475,41 +470,46 @@ class HeavenScroll {
         let pageBottomPosition;
         const screenTrigger = screenHeight - 50;
 
-        if (!this.isPageLoading) {
-            this.scrollValue = $document.scrollTop();
+        this.scrollValue = $document.scrollTop();
 
-            if (this.prevScroll > this.scrollValue) { // scroll up
-                this.updateUrlStartPageParam('up');
-                pageTopPosition = Math.abs(pages[0].getBoundingClientRect().top);
-                pageBottomPosition = Math.abs(pages[0].getBoundingClientRect().bottom);
-                pageNumber = parseInt(pages[0].getAttribute('data-page-number'));
+        if (this.prevScroll > this.scrollValue) { // scroll up
+            this.updateUrlStartPageParam('up');
+            pageTopPosition = Math.abs(pages[0].getBoundingClientRect().top);
+            pageBottomPosition = Math.abs(pages[0].getBoundingClientRect().bottom);
+            pageNumber = parseInt(pages[0].getAttribute('data-page-number'));
 
-                if (((pageTopPosition - pageBottomPosition) <= screenTrigger) && (pageNumber > 1)) {
-                    this.isPageLoading = true;
-
-                    this.loadingPage('scrollUp', pageNumber)
-                    .then(() => {
-                        this.isPageLoading = false;
-                    });
+            if (((pageTopPosition - pageBottomPosition) <= screenTrigger) && (pageNumber > 1)) {
+                if ($htmlBody.attr('data-processing')) {
+                    return;
                 }
-            } else if ((this.prevScroll < this.scrollValue) && (this.prevScroll !== 0)) { // scroll down
-                this.updateUrlStartPageParam('down');
-                pageTopPosition = Math.abs(pages[(pages.length - 1)].getBoundingClientRect().top);
-                pageBottomPosition = Math.abs(pages[(pages.length - 1)].getBoundingClientRect().bottom);
-
-                if (((pageBottomPosition - pageTopPosition) <= screenTrigger) && (this.currentPage < this.options.endPage)) {
-                    this.isPageLoading = true;
-                    pageNumber = parseInt(pages[(pages.length - 1)].getAttribute('data-page-number')) + 1;
-
-                    this.loadingPage('scrollDown', pageNumber)
-                    .then(() => {
-                        this.isPageLoading = false;
-                    });
-                }
+                $htmlBody.attr('data-processing', '1');
+        
+                this.loadingPage('scrollUp', pageNumber)
+                .finally(() => {
+                    $htmlBody.removeAttr('data-processing');
+                });
             }
+        } else if ((this.prevScroll < this.scrollValue) && (this.prevScroll !== 0)) { // scroll down
+            this.updateUrlStartPageParam('down');
+            pageTopPosition = Math.abs(pages[(pages.length - 1)].getBoundingClientRect().top);
+            pageBottomPosition = Math.abs(pages[(pages.length - 1)].getBoundingClientRect().bottom);
 
-            this.prevScroll = this.scrollValue;
+            if (((pageBottomPosition - pageTopPosition) <= screenTrigger) && (this.currentPage < this.options.endPage)) {
+                pageNumber = parseInt(pages[(pages.length - 1)].getAttribute('data-page-number')) + 1;
+
+                if ($htmlBody.attr('data-processing')) {
+                    return;
+                }
+                $htmlBody.attr('data-processing', '1');
+
+                this.loadingPage('scrollDown', pageNumber)
+                .finally(() => {
+                    $htmlBody.removeAttr('data-processing');                    
+                });
+            }
         }
+
+        this.prevScroll = this.scrollValue;
     }
 }
 
