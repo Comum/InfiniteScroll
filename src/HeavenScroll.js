@@ -448,7 +448,7 @@ class HeavenScroll {
      * @param {Integer} pageNumber
      */
     loadingPage(scrollDir, pageNumber) {
-        let pagesLength = 0;
+        let pagesLength = this.$el.find('.' + this.options.pageClassName).length;
         let spinnerPosition = 'top';
         let loadPagePosition = 'ini';
         let removePagePositon = 'last';
@@ -458,7 +458,6 @@ class HeavenScroll {
             spinnerPosition = 'bottom';
             loadPagePosition = 'end';
             removePagePositon = 'first';
-            pagesLength = this.$el.find('.' + this.options.pageClassName).length;
             pageToLoad = pageNumber;
         } else if(scrollDir !== 'scrollUp') {
             return Promise.reject(console.error('loadingPage(scrollDir, pageNumber): "' + scrollDir + '" is not a valid argument.'));
