@@ -395,33 +395,17 @@ class HeavenScroll {
      * @param {String} position
      */
     addSpinner(position) {
-        let html;
+        let html = `<div class="${this.options.spinnerClassName} show"></div>`;
         let spinnerHeightPosition;
         let $page;
 
         return new Promise((resolve, reject) => {
             if (position === 'top') {
                 $page = this.$el.find('.' + this.options.pageClassName + ':first');
-                spinnerHeightPosition = $page.position().top;
-                html = `<div
-                            class="${this.options.spinnerClassName} show"
-                            style="
-                                position: absolute;
-                                bottom: ${spinnerHeightPosition}px;
-                            ">
-                        </div>`;
                 $(html).insertBefore($page);
                 resolve();
             } else if (position === 'bottom') {
                 $page = this.$el.find('.' + this.options.pageClassName + ':last');
-                spinnerHeightPosition = $page.position().top + $page.outerHeight(true);
-                html = `<div
-                            class="${this.options.spinnerClassName} show"
-                            style="
-                                position: absolute;
-                                top: ${spinnerHeightPosition}px;
-                            ">
-                        </div>`;
                 $(html).insertAfter($page);
                 resolve();
             }
