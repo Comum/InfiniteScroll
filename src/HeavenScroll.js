@@ -448,35 +448,34 @@ class HeavenScroll {
      * @param {Integer} pageNumber
      */
     loadingPage(scrollDir, pageNumber) {
-        let pagesLength;
+        let pagesLength = 0;
+        let spinnerPosition = 'top';
+        let loadPagePosition = 'ini';
+        let removePagePositon = 'last';
+        let pageToLoad = (pageNumber - 1);
 
-        if (scrollDir === 'scrollUp') {
-            this.addSpinner('top');
-            return this.loadPage('ini', (pageNumber - 1))
-            .then(() => {
-                this.removePage('last');
-            })
-            .then(() => {
-                this.removeSpinner();
-            });
-        } else if (scrollDir === 'scrollDown') {
+        if (scrollDir === 'scrollDown') {
+            spinnerPosition = 'bottom';
+            loadPagePosition = 'end';
+            removePagePositon = 'first';
             pagesLength = this.$el.find('.' + this.options.pageClassName).length;
-
-            return this.addSpinner('bottom')
-            .then(() => {
-                return this.loadPage('end', pageNumber)
-            })
-            .then(() => {
-                if (pagesLength >= this.options.maxPagesNumber) {
-                    this.removePage('first');
-                }
-            })
-            .then(() => {
-                this.removeSpinner();
-            });
-        } else {
-            console.error('loadingPage(scrollDir, pageNumber): "' + scrollDir + '" is not a valid argument.');
+            pageToLoad = pageNumber;
+        } else if(scrollDir !== 'scrollUp') {
+            return Promise.reject(console.error('loadingPage(scrollDir, pageNumber): "' + scrollDir + '" is not a valid argument.'));
         }
+        
+        return this.addSpinner(spinnerPosition)
+        .then(() => {
+            return this.loadPage(loadPagePosition, pageToLoad)
+        })
+        .then(() => {
+            if (pagesLength >= this.options.maxPagesNumber) {
+                this.removePage(removePagePositon);
+            }
+        })
+        .then(() => {
+            this.removeSpinner();
+        });
 
         return Promise.resolve();
     }
