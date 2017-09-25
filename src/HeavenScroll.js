@@ -12,7 +12,8 @@ var defaultOptions = {
     urlQueryParamName: -1,
     loadPageFunction: function () {},
     spinnerClassName: 'Spinner',
-    throttleValue: 100
+    throttleValue: 100,
+    debugMode: false
 };
 
 const $window = $(window);
@@ -36,6 +37,7 @@ class HeavenScroll {
      * @param {Function} options.loadPageFunction
      * @param {String} options.spinnerClassName
      * @param {Integer} options.throttleValue
+     * @param {Boolean} options.debugMode
      */
     constructor(el, options) {
         this.el = el;
@@ -418,10 +420,6 @@ class HeavenScroll {
      * @param {Function} cb
      */
     removeSpinner(cb) {
-        // return new Promise((resolve, reject) => {
-        //     $.when(this.$el.find('.' + this.options.spinnerClassName).remove()).done(() => resolve());
-        // });
-        console.log($('.' + this.options.spinnerClassName))
         $('.' + this.options.spinnerClassName).remove();
     }
 
@@ -438,13 +436,13 @@ class HeavenScroll {
         let removePagePositon = 'last';
         let pageToLoad = (pageNumber - 1);
 
-        if (scrollDir === 'scrollDown') {
+        if (scrollDir === 'down') {
             spinnerPosition = 'bottom';
             loadPagePosition = 'end';
             removePagePositon = 'first';
             pageToLoad = pageNumber;
-        } else if(scrollDir !== 'scrollUp') {
-            return Promise.reject(console.error('loadingPage(scrollDir, pageNumber): "' + scrollDir + '" is not a valid argument.'));
+        } else if(scrollDir !== 'up') {
+            return Promise.reject();
         }
         
         return this.addSpinner(spinnerPosition)
@@ -463,50 +461,59 @@ class HeavenScroll {
         return Promise.resolve();
     }
 
+    scrollControll() {
+        if (this.prevScroll > this.scrollValue) {
+            return 'up';
+        } else if ((this.prevScroll < this.scrollValue) && (this.prevScroll !== 0)) {
+            return 'down';
+        }
+    }
+
     onScroll() {
+        // default scroll top value
         let pages = document.getElementsByClassName(this.options.pageClassName);
-        let pageNumber;
-        let pageTopPosition;
-        let pageBottomPosition;
+        let pageNumber = parseInt(pages[0].getAttribute('data-page-number'));
+        let pageTopPosition = Math.abs(pages[0].getBoundingClientRect().top);
+        let pageBottomPosition = Math.abs(pages[0].getBoundingClientRect().bottom);
+        let scrollDirection;
         const screenTrigger = screenHeight - 50;
 
         this.scrollValue = $document.scrollTop();
+        scrollDirection = this.scrollControll();
 
-        if (this.prevScroll > this.scrollValue) { // scroll up
-            this.updateUrlStartPageParam('up');
-            pageTopPosition = Math.abs(pages[0].getBoundingClientRect().top);
-            pageBottomPosition = Math.abs(pages[0].getBoundingClientRect().bottom);
-            pageNumber = parseInt(pages[0].getAttribute('data-page-number'));
-
-            if (((pageTopPosition - pageBottomPosition) <= screenTrigger) && (pageNumber > 1)) {
-                if ($htmlBody.attr('data-processing')) {
-                    return;
-                }
-                $htmlBody.attr('data-processing', '1');
-        
-                this.loadingPage('scrollUp', pageNumber)
-                .finally(() => {
-                    $htmlBody.removeAttr('data-processing');
-                });
+        if (scrollDirection === 'up') {
+            // scroll up
+            if ($htmlBody.attr('data-processing')) {
+                return;
             }
-        } else if ((this.prevScroll < this.scrollValue) && (this.prevScroll !== 0)) { // scroll down
-            this.updateUrlStartPageParam('down');
+            this.updateUrlStartPageParam(scrollDirection);
+            if (((pageTopPosition - pageBottomPosition) <= screenTrigger) && (pageNumber > 1) ) {
+                $htmlBody.attr('data-processing', '1');
+            }
+        } else if (scrollDirection === 'down') {
+            // scroll down
+            if ($htmlBody.attr('data-processing')) {
+                return;
+            }
+            this.updateUrlStartPageParam(scrollDirection);
             pageTopPosition = Math.abs(pages[(pages.length - 1)].getBoundingClientRect().top);
             pageBottomPosition = Math.abs(pages[(pages.length - 1)].getBoundingClientRect().bottom);
-
-            if (((pageBottomPosition - pageTopPosition) <= screenTrigger) && (this.currentPage < this.options.endPage)) {
+            if (((pageBottomPosition - pageTopPosition) <= screenTrigger) && (this.currentPage < this.options.endPage)) {                
                 pageNumber = parseInt(pages[(pages.length - 1)].getAttribute('data-page-number')) + 1;
-
-                if ($htmlBody.attr('data-processing')) {
-                    return;
-                }
                 $htmlBody.attr('data-processing', '1');
+            }  
+        }
 
-                this.loadingPage('scrollDown', pageNumber)
-                .finally(() => {
-                    $htmlBody.removeAttr('data-processing');                    
-                });
-            }
+        if ($htmlBody.attr('data-processing')) {
+            this.loadingPage(scrollDirection, pageNumber)
+            .catch(() => {
+                if (this.options.debugMode) {
+                    console.error('loadingPage(scrollDir, pageNumber): "' + scrollDir + '" is not a valid argument.');
+                }
+            })
+            .finally(() => {
+                $htmlBody.removeAttr('data-processing');
+            });
         }
 
         this.prevScroll = this.scrollValue;

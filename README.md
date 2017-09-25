@@ -71,7 +71,8 @@ $pagesContainer.heavenScroll({
 		urlQueryParamName: 'startPage', // page to start url query parameter name
 		loadPageFunction: productTileFetcher,  // function that returns the html to be shown
 		spinnerClassName: 'Spinner', // default class name 'Spinner'
-		throttleValue: 100 // default throttle value
+		throttleValue: 100, // default throttle value
+		debugMode: true // enable debugMode for loading a page information, it's default value is `false`
     });
 ```
 
