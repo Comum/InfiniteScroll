@@ -418,10 +418,6 @@ class HeavenScroll {
      * @param {Function} cb
      */
     removeSpinner(cb) {
-        // return new Promise((resolve, reject) => {
-        //     $.when(this.$el.find('.' + this.options.spinnerClassName).remove()).done(() => resolve());
-        // });
-        console.log($('.' + this.options.spinnerClassName))
         $('.' + this.options.spinnerClassName).remove();
     }
 
