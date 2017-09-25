@@ -462,6 +462,8 @@ class HeavenScroll {
     }
 
     scrollControll() {
+        this.scrollValue = $document.scrollTop();
+
         if (this.prevScroll > this.scrollValue) {
             return 'up';
         } else if ((this.prevScroll < this.scrollValue) && (this.prevScroll !== 0)) {
@@ -471,52 +473,45 @@ class HeavenScroll {
 
     onScroll() {
         // default scroll top value
+        const screenTrigger = screenHeight - 50;
         let pages = document.getElementsByClassName(this.options.pageClassName);
         let pageNumber = parseInt(pages[0].getAttribute('data-page-number'));
         let pageTopPosition = Math.abs(pages[0].getBoundingClientRect().top);
         let pageBottomPosition = Math.abs(pages[0].getBoundingClientRect().bottom);
-        let scrollDirection;
-        const screenTrigger = screenHeight - 50;
-
-        this.scrollValue = $document.scrollTop();
-        scrollDirection = this.scrollControll();
-
-        if (scrollDirection === 'up') {
-            // scroll up
-            if ($htmlBody.attr('data-processing')) {
-                return;
-            }
-            this.updateUrlStartPageParam(scrollDirection);
-            if (((pageTopPosition - pageBottomPosition) <= screenTrigger) && (pageNumber > 1) ) {
-                $htmlBody.attr('data-processing', '1');
-            }
-        } else if (scrollDirection === 'down') {
-            // scroll down
-            if ($htmlBody.attr('data-processing')) {
-                return;
-            }
-            this.updateUrlStartPageParam(scrollDirection);
+        let scrollDirection = this.scrollControll();
+        let pastTriggerPosition = (pageTopPosition - pageBottomPosition) <= screenTrigger;
+        let pageLoadRestrictionParam = pageNumber > 1;
+        
+        if (scrollDirection === 'down') {
             pageTopPosition = Math.abs(pages[(pages.length - 1)].getBoundingClientRect().top);
             pageBottomPosition = Math.abs(pages[(pages.length - 1)].getBoundingClientRect().bottom);
-            if (((pageBottomPosition - pageTopPosition) <= screenTrigger) && (this.currentPage < this.options.endPage)) {                
-                pageNumber = parseInt(pages[(pages.length - 1)].getAttribute('data-page-number')) + 1;
-                $htmlBody.attr('data-processing', '1');
-            }  
+            pastTriggerPosition = (pageBottomPosition - pageTopPosition) <= screenTrigger;
+            pageLoadRestrictionParam = this.currentPage < this.options.endPage;
+            pageNumber = parseInt(pages[(pages.length - 1)].getAttribute('data-page-number')) + 1;
         }
+
+        this.updateUrlStartPageParam(scrollDirection);
+        this.prevScroll = this.scrollValue;
 
         if ($htmlBody.attr('data-processing')) {
-            this.loadingPage(scrollDirection, pageNumber)
-            .catch(() => {
-                if (this.options.debugMode) {
-                    console.error('loadingPage(scrollDir, pageNumber): "' + scrollDir + '" is not a valid argument.');
-                }
-            })
-            .finally(() => {
-                $htmlBody.removeAttr('data-processing');
-            });
+            return;
         }
 
-        this.prevScroll = this.scrollValue;
+        if (!pastTriggerPosition || !pageLoadRestrictionParam) {
+            return;
+        }
+
+        $htmlBody.attr('data-processing', '1');
+
+        this.loadingPage(scrollDirection, pageNumber)
+        .catch(() => {
+            if (this.options.debugMode) {
+                console.error('loadingPage(scrollDir, pageNumber): "' + scrollDir + '" is not a valid argument.');
+            }
+        })
+        .finally(() => {
+            $htmlBody.removeAttr('data-processing');
+        });
     }
 }
 
