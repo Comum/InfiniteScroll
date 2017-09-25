@@ -1,5 +1,5 @@
 # HeavenScroll
-> Heaven scroll provides an InfinateScroll with amazing performance and experiance improvements
+> Heaven scroll provides an InfiniteScroll with amazing performance and experience improvements
 
 ## Pre-requisites
 Install the package dependencies by running the following command
