@@ -12,7 +12,6 @@ var defaultOptions = {
     urlQueryParamName: -1,
     loadPageFunction: function () {},
     spinnerClassName: 'Spinner',
-    throttleValue: 100,
     debugMode: false
 };
 
@@ -49,7 +48,7 @@ class HeavenScroll {
 
         this.updateUrlStartPageParam('');
         this.initHeavenScroll();
-        $window.on('scroll', _.throttle(this.onScroll.bind(this), this.options.throttleValue));
+        $window.on('scroll', this.onScroll.bind(this));
     }
 
     init() {
@@ -165,10 +164,27 @@ class HeavenScroll {
      */
     loadPage(position, printPageNumber) {
         let args;
+        let $page;
+        let infoAllReadyExists = false;
 
         args = {
             pageClassName: this.options.pageClassName,
             pageNumber: printPageNumber
+        }
+
+        if (printPageNumber.constructor !== Array) {
+            $page = this.$el.find('[data-page-number=' + printPageNumber + ']');
+            if ($page.hasClass('visibility-hidden') && $page.hasClass('beforePlaceHolderDiv')) {
+                $page
+                    .removeClass('visibility-hidden beforePlaceHolderDiv js-page-hook')
+                    .addClass('js-page-hook');
+                return;
+            } else if ($page.hasClass('visibility-hidden') && $page.hasClass('afterPlaceHolderDiv')) {
+                $page
+                    .removeClass('visibility-hidden afterPlaceHolderDiv js-page-hook')
+                    .addClass('js-page-hook');
+                return;
+            }
         }
 
         return new Promise((resolve, reject) => {
@@ -176,7 +192,7 @@ class HeavenScroll {
             this.loadPageFunction = this.options.loadPageFunction;
             this.loadPageFunction(args, (html) => {
                 let realHtml;
-
+                
                 // check if this.wrapHtmlPage() is called in implemented (by 'user') function
                 if (typeof html === 'undefined' || !html) {
                     realHtml = this.wrapHtmlPage(`<p class="errorLoadingPageMessage">Error Loading Page</p>`, args);
@@ -193,10 +209,10 @@ class HeavenScroll {
                         localStorage.setItem('listingPage1', this.$el.find('.' + this.options.pageClassName + ':first').height());
                     }
 
-                } else if (position === 'end') {
+                } else if (position === 'last') {
                     $(realHtml).hide().insertAfter('.' + this.options.pageClassName + ':last').fadeIn(this.options.fadeInValue);
                     this.$el.find('.afterPlaceHolderDiv:first').remove();
-                } else if (position === 'ini') {
+                } else if (position === 'first') {
                     $(realHtml).hide().insertBefore('.' + this.options.pageClassName + ':first').fadeIn(this.options.fadeInValue);
                     this.$el.find('.beforePlaceHolderDiv:last').remove();
                 } else {
@@ -225,7 +241,7 @@ class HeavenScroll {
         }
 
         return `<div
-                     class="${options.pageClassName}"
+                     class="${options.pageClassName} js-page-hook"
                      style="
                          position: relative;"
                      data-page-number="${options.pageNumber}"
@@ -289,24 +305,24 @@ class HeavenScroll {
      * @param {String} position
      */
     removePage(position) {
-        let pageHeight;
-        let html;
-        let $page;
+        let pageHeight; // not used
+        let html; // not used
+        let $page; // not used
+        let className = 'visibility-hidden';
 
         if ((position !== 'first') && (position !== 'last')) {
             console.error('removePage(position): "' + position + '" is not a valid argument.');
         } else {
             if (position === 'first') {
-                $page = this.$el.find('.' + this.options.pageClassName + ':first');
-                pageHeight = $page.height();
-                html = `<div class="beforePlaceHolderDiv" style="width: 100%; height: ${pageHeight}px; position: relative;"></div>`;
+                className += ' beforePlaceHolderDiv';
             } else if (position === 'last') {
-                $page = this.$el.find('.' + this.options.pageClassName + ':last');
-                pageHeight = $page.height();
-                html = `<div class="afterPlaceHolderDiv" style="width: 100%; height: ${pageHeight}px; position: relative;"></div>`;
+                className += ' afterPlaceHolderDiv';
             }
 
-            $page.replaceWith(html);
+            this.$el
+                .find('.js-page-hook:' + position)
+                .addClass(className)
+                .removeClass('js-page-hook');
         }
     }
 
@@ -432,13 +448,13 @@ class HeavenScroll {
     loadingPage(scrollDir, pageNumber) {
         let pagesLength = this.$el.find('.' + this.options.pageClassName).length;
         let spinnerPosition = 'top';
-        let loadPagePosition = 'ini';
+        let loadPagePosition = 'first';
         let removePagePositon = 'last';
         let pageToLoad = (pageNumber - 1);
 
         if (scrollDir === 'down') {
             spinnerPosition = 'bottom';
-            loadPagePosition = 'end';
+            loadPagePosition = 'last';
             removePagePositon = 'first';
             pageToLoad = pageNumber;
         } else if(scrollDir !== 'up') {
@@ -474,7 +490,7 @@ class HeavenScroll {
     onScroll() {
         // default scroll top value
         const screenTrigger = screenHeight - 50;
-        let pages = document.getElementsByClassName(this.options.pageClassName);
+        let pages = document.getElementsByClassName('js-page-hook');
         let pageNumber = parseInt(pages[0].getAttribute('data-page-number'));
         let pageTopPosition = Math.abs(pages[0].getBoundingClientRect().top);
         let pageBottomPosition = Math.abs(pages[0].getBoundingClientRect().bottom);
@@ -506,7 +522,7 @@ class HeavenScroll {
         this.loadingPage(scrollDirection, pageNumber)
         .catch(() => {
             if (this.options.debugMode) {
-                console.error('loadingPage(scrollDir, pageNumber): "' + scrollDir + '" is not a valid argument.');
+                console.error('loadingPage(scrollDir, pageNumber): "' + scrollDirection + '" is not a valid argument.');
             }
         })
         .finally(() => {

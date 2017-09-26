@@ -60,7 +60,6 @@ $(document).ready(function () {
         urlQueryParamName: 'startPage',
         loadPageFunction: productTileFetcher,
         spinnerClassName: 'Spinner',
-        throttleValue: 100,
         debugMode: true
     });
 });

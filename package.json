@@ -1,6 +1,6 @@
 {
   "name": "jquery-heaven-scroll",
-  "version": "3.2.2",
+  "version": "3.3.2",
   "description": " Heaven scroll provides an InfinateScroll with amazing performance and experiance improvements",
   "main": "dist/module.js",
   "scripts": {
