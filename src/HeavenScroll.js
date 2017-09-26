@@ -12,7 +12,6 @@ var defaultOptions = {
     urlQueryParamName: -1,
     loadPageFunction: function () {},
     spinnerClassName: 'Spinner',
-    throttleValue: 100,
     debugMode: false
 };
 
@@ -49,7 +48,7 @@ class HeavenScroll {
 
         this.updateUrlStartPageParam('');
         this.initHeavenScroll();
-        $window.on('scroll', _.throttle(this.onScroll.bind(this), this.options.throttleValue));
+        $window.on('scroll', this.onScroll.bind(this));
     }
 
     init() {
