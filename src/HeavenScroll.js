@@ -506,7 +506,7 @@ class HeavenScroll {
         this.loadingPage(scrollDirection, pageNumber)
         .catch(() => {
             if (this.options.debugMode) {
-                console.error('loadingPage(scrollDir, pageNumber): "' + scrollDir + '" is not a valid argument.');
+                console.error('loadingPage(scrollDir, pageNumber): "' + scrollDirection + '" is not a valid argument.');
             }
         })
         .finally(() => {
