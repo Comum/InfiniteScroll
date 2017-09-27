@@ -305,25 +305,23 @@ class HeavenScroll {
      * @param {String} position
      */
     removePage(position) {
-        let pageHeight; // not used
-        let html; // not used
-        let $page; // not used
         let className = 'visibility-hidden';
 
         if ((position !== 'first') && (position !== 'last')) {
             console.error('removePage(position): "' + position + '" is not a valid argument.');
-        } else {
-            if (position === 'first') {
-                className += ' beforePlaceHolderDiv';
-            } else if (position === 'last') {
-                className += ' afterPlaceHolderDiv';
-            }
-
-            this.$el
-                .find('.js-page-hook:' + position)
-                .addClass(className)
-                .removeClass('js-page-hook');
+            return;
         }
+
+        if (position === 'first') {
+            className += ' beforePlaceHolderDiv';
+        } else if (position === 'last') {
+            className += ' afterPlaceHolderDiv';
+        }
+
+        this.$el
+            .find('.js-page-hook:' + position)
+            .addClass(className)
+            .removeClass('js-page-hook');
     }
 
     replaceQueryParam(param, newval, search) {
