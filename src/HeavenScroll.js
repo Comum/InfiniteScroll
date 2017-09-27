@@ -176,12 +176,12 @@ class HeavenScroll {
             $page = this.$el.find('[data-page-number=' + printPageNumber + ']');
             if ($page.hasClass('visibility-hidden') && $page.hasClass('beforePlaceHolderDiv')) {
                 $page
-                    .removeClass('visibility-hidden beforePlaceHolderDiv js-page-hook')
+                    .removeClass('visibility-hidden beforePlaceHolderDiv')
                     .addClass('js-page-hook');
                 return;
             } else if ($page.hasClass('visibility-hidden') && $page.hasClass('afterPlaceHolderDiv')) {
                 $page
-                    .removeClass('visibility-hidden afterPlaceHolderDiv js-page-hook')
+                    .removeClass('visibility-hidden afterPlaceHolderDiv')
                     .addClass('js-page-hook');
                 return;
             }
