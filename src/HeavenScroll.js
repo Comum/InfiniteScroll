@@ -270,12 +270,14 @@ class HeavenScroll {
             return this.loadPage('iniHeaven', this.urlStartPage);
         }
 
-        // load 3 pages, 1 before and 1 after
-        if (this.urlStartPage === this.options.endPage) {
+        // load 3 pages, 2 before
+        if (this.urlStartPage > 2) {
+            pagesArray = [(this.urlStartPage - 2), (this.urlStartPage - 1), this.urlStartPage];
+        } else if (this.urlStartPage > 1) {
             pagesArray = [(this.urlStartPage - 1), this.urlStartPage];
-        } else {
-            pagesArray = [(this.urlStartPage - 1), this.urlStartPage, (this.urlStartPage + 1)];
         }
+
+        console.log(pagesArray);
 
         return this.loadPage('iniHeaven', pagesArray)
             .then(() => {
@@ -289,7 +291,7 @@ class HeavenScroll {
                     setTimeout(() => {
                         let firstPage = this
                             .$el
-                            .find('.' + this.options.pageClassName + ':eq(1)')
+                            .find('.' + this.options.pageClassName + ':eq(2)')
                             .position()
                             .top;
 
