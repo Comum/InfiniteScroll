@@ -160,7 +160,7 @@ class HeavenScroll {
      * Returns the resolved promise when the html is added to the DOM
      *
      * @param {String} position
-     * @param {Integer} printPageNumber
+     * @param {Integer||Array} printPageNumber
      */
     loadPage(position, printPageNumber) {
         let args;
@@ -225,6 +225,33 @@ class HeavenScroll {
         });
     }
 
+    loadInvisiblePage(pages) {
+        let promises = [];
+        this.loadPageFunction = this.options.loadPageFunction;
+        pages.reverse();
+        pages.forEach((pageNumber) => {
+           let args = {
+            pageClassName: this.options.pageClassName,
+            pageNumber: pageNumber
+           };
+
+           this.loadPageFunction(args, (html) => {
+               if ($(html).hasClass('js-page-hook')) {
+                   $(html)
+                    .removeClass('js-page-hook')
+                    .addClass('visibility-hidden beforePlaceHolderDiv');
+                    
+               } else {
+                   args.beforePlaceholder = true;
+                   html = this.wrapHtmlPage(html, args);
+               }
+
+               $(html).insertBefore('.js-page-hook:first');
+               console.log(pageNumber);
+           });
+        });
+    }
+
     /**
      * Returns the wrapped html into a div
      *
@@ -232,6 +259,7 @@ class HeavenScroll {
      * @param {Object} options
      * @param {String} options.pageClassName
      * @param {Integer} options.pageNumber
+     * @param {||Boolean} options.beforePlaceholder
      */
     wrapHtmlPage(contentEl, options) {
         let htmlNewContent = contentEl;
@@ -240,27 +268,33 @@ class HeavenScroll {
             htmlNewContent = `<p class="errorLoadingPageMessage">Error Loading Page</p>`;
         }
 
+        if (options.beforePlaceholder === true) {
+            return `<div
+                    class="${options.pageClassName} visibility-hidden beforePlaceHolderDiv"
+                    style="
+                        position: relative;"
+                    data-page-number="${options.pageNumber}"
+                    >
+                    ${htmlNewContent}
+            </div>`;   
+        }
         return `<div
-                     class="${options.pageClassName} js-page-hook"
-                     style="
-                         position: relative;"
-                     data-page-number="${options.pageNumber}"
-                     >
-                        ${htmlNewContent}
-                </div>`;
+                class="${options.pageClassName} js-page-hook"
+                style="
+                    position: relative;"
+                data-page-number="${options.pageNumber}"
+                >
+                ${htmlNewContent}
+        </div>`;
     }
 
-    populatePlaceholderEmptyDivs() {
-        let html = '';
-        let placholderHeight;
-
-        for (let i = 1 ; i <= (this.urlStartPage - 2) ; i++) {
-            placholderHeight = localStorage.getItem('listingPage' + i) || this.options.pageHeight;
-
-            html = html + `<div class="beforePlaceHolderDiv" style="width: 100%; height: ${placholderHeight}px; position: relative;"></div>`;
-        }
-
-        this.$el.prepend(html);
+    populatePlaceholderHiddenDivs() {
+        return new Promise((resolve, reject) => {
+            let pageArray = Array.from(new Array(this.urlStartPage - 3), (val, index) => index + 1);
+            
+            this.loadInvisiblePage(pageArray);
+            resolve();
+        });
     }
 
     initHeavenScroll() { 
@@ -277,28 +311,25 @@ class HeavenScroll {
             pagesArray = [(this.urlStartPage - 1), this.urlStartPage];
         }
 
-        console.log(pagesArray);
-
         return this.loadPage('iniHeaven', pagesArray)
             .then(() => {
                 // only if startPage is bigger than 3 it will update padding on start up
                 if (this.urlStartPage > 1) {
                     if (this.urlStartPage > 2) {
-                        this.populatePlaceholderEmptyDivs();
+                        return this.populatePlaceholderHiddenDivs()
+                            .then(() => {
+                                // scroll to page
+                                let firstPage = this
+                                    .$el
+                                    .find('.' + this.options.pageClassName + ':eq(2)')
+                                    .position()
+                                    .top;
+            
+                                $htmlBody.animate({ scrollTop: firstPage }, 0);
+                            });
                     }
-
-                    // scroll to page
-                    setTimeout(() => {
-                        let firstPage = this
-                            .$el
-                            .find('.' + this.options.pageClassName + ':eq(2)')
-                            .position()
-                            .top;
-
-                        $htmlBody.animate({ scrollTop: firstPage }, 0);
-                    }, 0);
                 }
-            });
+            })
     }
 
     /**
