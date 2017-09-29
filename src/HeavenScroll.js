@@ -216,7 +216,7 @@ class HeavenScroll {
                     $(realHtml).hide().insertBefore('.' + this.options.pageClassName + ':first').fadeIn(this.options.fadeInValue);
                     this.$el.find('.beforePlaceHolderDiv:last').remove();
                 } else {
-                    console.error('loadPage(position, printPageNumber): "' + position + '" is not a valid argument.');
+                    this.errorMsg('loadPage(position, printPageNumber): "' + position + '" is not a valid argument.');
                 }
 
                 this.$pages = this.$el.find('.' + this.options.pageClassName);
@@ -247,7 +247,6 @@ class HeavenScroll {
                }
 
                $(html).insertBefore('.js-page-hook:first');
-               console.log(pageNumber);
            });
         });
     }
@@ -341,7 +340,7 @@ class HeavenScroll {
         let className = 'visibility-hidden';
 
         if ((position !== 'first') && (position !== 'last')) {
-            console.error('removePage(position): "' + position + '" is not a valid argument.');
+            this.errorMsg('removePage(position): "' + position + '" is not a valid argument.');
             return;
         }
 
@@ -434,7 +433,7 @@ class HeavenScroll {
                 }
             }
         } else if (scrolligOption !== '') {
-            console.error('updateUrlStartPageParam(scrolligOption): "' + scrolligOption + '" is not a valid argument.');
+            this.errorMsg('updateUrlStartPageParam(scrolligOption): "' + scrolligOption + '" is not a valid argument.');
         }
     }
 
@@ -553,12 +552,23 @@ class HeavenScroll {
         this.loadingPage(scrollDirection, pageNumber)
         .catch(() => {
             if (this.options.debugMode) {
-                console.error('loadingPage(scrollDir, pageNumber): "' + scrollDirection + '" is not a valid argument.');
+                this.errorMsg('loadingPage(scrollDir, pageNumber): "' + scrollDirection + '" is not a valid argument.');
             }
         })
         .finally(() => {
             $htmlBody.removeAttr('data-processing');
         });
+    }
+
+    /**
+     * Prints error to the console, if debug mode enabled
+     * 
+     * @param {String} error 
+     */
+    errorMsg(error) {
+        if (this.options.debugMode) {
+            console.error(string);
+        }
     }
 }
 
