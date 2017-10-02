@@ -160,7 +160,7 @@ class HeavenScroll {
      * Returns the resolved promise when the html is added to the DOM
      *
      * @param {String} position
-     * @param {Integer} printPageNumber
+     * @param {Integer||Array} printPageNumber
      */
     loadPage(position, printPageNumber) {
         let args;
@@ -216,12 +216,36 @@ class HeavenScroll {
                     $(realHtml).hide().insertBefore('.' + this.options.pageClassName + ':first').fadeIn(this.options.fadeInValue);
                     this.$el.find('.beforePlaceHolderDiv:last').remove();
                 } else {
-                    console.error('loadPage(position, printPageNumber): "' + position + '" is not a valid argument.');
+                    this.errorMsg('loadPage(position, printPageNumber): "' + position + '" is not a valid argument.');
                 }
 
                 this.$pages = this.$el.find('.' + this.options.pageClassName);
                 resolve();
             });
+        });
+    }
+
+    loadInvisiblePage(pages) {
+        let promises = [];
+        this.loadPageFunction = this.options.loadPageFunction;
+        pages.forEach((pageNumber) => {
+           let args = {
+            pageClassName: this.options.pageClassName,
+            pageNumber: pageNumber
+           };
+
+           this.loadPageFunction(args, (html) => {
+               let $html = $(html);
+
+               if ($html.hasClass('js-page-hook')) {
+                    $html.removeClass('js-page-hook')
+                    .addClass('visibility-hidden beforePlaceHolderDiv');
+               } else {
+                   args.beforePlaceholder = true;
+                   html = this.wrapHtmlPage(html, args);
+               }
+               $html.insertBefore('.js-page-hook:first');
+           });
         });
     }
 
@@ -232,6 +256,7 @@ class HeavenScroll {
      * @param {Object} options
      * @param {String} options.pageClassName
      * @param {Integer} options.pageNumber
+     * @param {||Boolean} options.beforePlaceholder
      */
     wrapHtmlPage(contentEl, options) {
         let htmlNewContent = contentEl;
@@ -240,27 +265,34 @@ class HeavenScroll {
             htmlNewContent = `<p class="errorLoadingPageMessage">Error Loading Page</p>`;
         }
 
+        if (options.beforePlaceholder === true) {
+            return `<div
+                    class="${options.pageClassName} visibility-hidden beforePlaceHolderDiv"
+                    style="
+                        position: relative;"
+                    data-page-number="${options.pageNumber}"
+                    >
+                    ${htmlNewContent}
+            </div>`;   
+        }
         return `<div
-                     class="${options.pageClassName} js-page-hook"
-                     style="
-                         position: relative;"
-                     data-page-number="${options.pageNumber}"
-                     >
-                        ${htmlNewContent}
-                </div>`;
+                class="${options.pageClassName} js-page-hook"
+                style="
+                    position: relative;"
+                data-page-number="${options.pageNumber}"
+                >
+                ${htmlNewContent}
+        </div>`;
     }
 
-    populatePlaceholderEmptyDivs() {
-        let html = '';
-        let placholderHeight;
-
-        for (let i = 1 ; i <= (this.urlStartPage - 2) ; i++) {
-            placholderHeight = localStorage.getItem('listingPage' + i) || this.options.pageHeight;
-
-            html = html + `<div class="beforePlaceHolderDiv" style="width: 100%; height: ${placholderHeight}px; position: relative;"></div>`;
-        }
-
-        this.$el.prepend(html);
+    populatePlaceholderHiddenDivs() {
+        return new Promise((resolve, reject) => {
+            let numberOfPagesNeeded = this.urlStartPage - 3;
+            let pageArray = Array.from({length: numberOfPagesNeeded}, (val, index) => index + 1);
+            
+            this.loadInvisiblePage(pageArray);
+            resolve();
+        });
     }
 
     initHeavenScroll() { 
@@ -270,11 +302,11 @@ class HeavenScroll {
             return this.loadPage('iniHeaven', this.urlStartPage);
         }
 
-        // load 3 pages, 1 before and 1 after
-        if (this.urlStartPage === this.options.endPage) {
+        // load 3 pages, 2 before
+        if (this.urlStartPage > 2) {
+            pagesArray = [(this.urlStartPage - 2), (this.urlStartPage - 1), this.urlStartPage];
+        } else if (this.urlStartPage > 1) {
             pagesArray = [(this.urlStartPage - 1), this.urlStartPage];
-        } else {
-            pagesArray = [(this.urlStartPage - 1), this.urlStartPage, (this.urlStartPage + 1)];
         }
 
         return this.loadPage('iniHeaven', pagesArray)
@@ -282,21 +314,20 @@ class HeavenScroll {
                 // only if startPage is bigger than 3 it will update padding on start up
                 if (this.urlStartPage > 1) {
                     if (this.urlStartPage > 2) {
-                        this.populatePlaceholderEmptyDivs();
+                        return this.populatePlaceholderHiddenDivs()
+                            .then(() => {
+                                // scroll to page
+                                let firstPage = this
+                                    .$el
+                                    .find('.' + this.options.pageClassName + ':eq(2)')
+                                    .position()
+                                    .top;
+            
+                                $htmlBody.animate({ scrollTop: firstPage }, 0);
+                            });
                     }
-
-                    // scroll to page
-                    setTimeout(() => {
-                        let firstPage = this
-                            .$el
-                            .find('.' + this.options.pageClassName + ':eq(1)')
-                            .position()
-                            .top;
-
-                        $htmlBody.animate({ scrollTop: firstPage }, 0);
-                    }, 0);
                 }
-            });
+            })
     }
 
     /**
@@ -308,7 +339,7 @@ class HeavenScroll {
         let className = 'visibility-hidden';
 
         if ((position !== 'first') && (position !== 'last')) {
-            console.error('removePage(position): "' + position + '" is not a valid argument.');
+            this.errorMsg('removePage(position): "' + position + '" is not a valid argument.');
             return;
         }
 
@@ -401,7 +432,7 @@ class HeavenScroll {
                 }
             }
         } else if (scrolligOption !== '') {
-            console.error('updateUrlStartPageParam(scrolligOption): "' + scrolligOption + '" is not a valid argument.');
+            this.errorMsg('updateUrlStartPageParam(scrolligOption): "' + scrolligOption + '" is not a valid argument.');
         }
     }
 
@@ -485,6 +516,28 @@ class HeavenScroll {
         }
     }
 
+    resetPagesView() {
+        let firstPageVisible = this.$el.find('.js-page-hook:first').data('pageNumber');
+        let $pages;
+
+        if (firstPageVisible === 1) {
+            return;
+        }
+
+        $pages = this.$el.find('.' + this.options.pageClassName);
+        $pages.each((index, page) => {
+            if (index < 3) {
+                $(page).removeClass('visibility-hidden beforePlaceHolderDiv').addClass('js-page-hook');
+            } else {
+                if ($(page).hasClass('js-page-hook')) {   
+                    $(page).removeClass('js-page-hook').addClass('visibility-hidden afterPlaceHolderDiv');
+                }
+            }
+        });
+
+        this.urlQueryParamValueUpdate(1);
+    }
+
     onScroll() {
         // default scroll top value
         const screenTrigger = screenHeight - 50;
@@ -495,6 +548,11 @@ class HeavenScroll {
         let scrollDirection = this.scrollControll();
         let pastTriggerPosition = (pageTopPosition - pageBottomPosition) <= screenTrigger;
         let pageLoadRestrictionParam = pageNumber > 1;
+
+        if (this.scrollValue === 0) {
+            this.resetPagesView();
+            return;
+        }
         
         if (scrollDirection === 'down') {
             pageTopPosition = Math.abs(pages[(pages.length - 1)].getBoundingClientRect().top);
@@ -520,12 +578,23 @@ class HeavenScroll {
         this.loadingPage(scrollDirection, pageNumber)
         .catch(() => {
             if (this.options.debugMode) {
-                console.error('loadingPage(scrollDir, pageNumber): "' + scrollDirection + '" is not a valid argument.');
+                this.errorMsg('loadingPage(scrollDir, pageNumber): "' + scrollDirection + '" is not a valid argument.');
             }
         })
         .finally(() => {
             $htmlBody.removeAttr('data-processing');
         });
+    }
+
+    /**
+     * Prints error to the console, if debug mode enabled
+     * 
+     * @param {String} error 
+     */
+    errorMsg(error) {
+        if (this.options.debugMode) {
+            console.error(string);
+        }
     }
 }
 
