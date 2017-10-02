@@ -525,7 +525,7 @@ class HeavenScroll {
         }
 
         $pages = this.$el.find('.' + this.options.pageClassName);
-        $pages.each((index, page) => { console.log($(page));
+        $pages.each((index, page) => {
             if (index < 3) {
                 $(page).removeClass('visibility-hidden beforePlaceHolderDiv').addClass('js-page-hook');
             } else {
@@ -534,6 +534,8 @@ class HeavenScroll {
                 }
             }
         });
+
+        this.urlQueryParamValueUpdate(1);
     }
 
     onScroll() {
