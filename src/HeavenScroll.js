@@ -228,7 +228,6 @@ class HeavenScroll {
     loadInvisiblePage(pages) {
         let promises = [];
         this.loadPageFunction = this.options.loadPageFunction;
-        pages.reverse();
         pages.forEach((pageNumber) => {
            let args = {
             pageClassName: this.options.pageClassName,
@@ -236,17 +235,16 @@ class HeavenScroll {
            };
 
            this.loadPageFunction(args, (html) => {
-               if ($(html).hasClass('js-page-hook')) {
-                   $(html)
-                    .removeClass('js-page-hook')
+               let $html = $(html);
+
+               if ($html.hasClass('js-page-hook')) {
+                    $html.removeClass('js-page-hook')
                     .addClass('visibility-hidden beforePlaceHolderDiv');
-                    
                } else {
                    args.beforePlaceholder = true;
                    html = this.wrapHtmlPage(html, args);
                }
-
-               $(html).insertBefore('.js-page-hook:first');
+               $html.insertBefore('.js-page-hook:first');
            });
         });
     }
@@ -289,7 +287,8 @@ class HeavenScroll {
 
     populatePlaceholderHiddenDivs() {
         return new Promise((resolve, reject) => {
-            let pageArray = Array.from(new Array(this.urlStartPage - 3), (val, index) => index + 1);
+            let numberOfPagesNeeded = this.urlStartPage - 3;
+            let pageArray = Array.from({length: numberOfPagesNeeded}, (val, index) => index + 1);
             
             this.loadInvisiblePage(pageArray);
             resolve();
@@ -517,6 +516,26 @@ class HeavenScroll {
         }
     }
 
+    resetPagesView() {
+        let firstPageVisible = this.$el.find('.js-page-hook:first').data('pageNumber');
+        let $pages;
+
+        if (firstPageVisible === 1) {
+            return;
+        }
+
+        $pages = this.$el.find('.' + this.options.pageClassName);
+        $pages.each((index, page) => { console.log($(page));
+            if (index < 3) {
+                $(page).removeClass('visibility-hidden beforePlaceHolderDiv').addClass('js-page-hook');
+            } else {
+                if ($(page).hasClass('js-page-hook')) {   
+                    $(page).removeClass('js-page-hook').addClass('visibility-hidden afterPlaceHolderDiv');
+                }
+            }
+        });
+    }
+
     onScroll() {
         // default scroll top value
         const screenTrigger = screenHeight - 50;
@@ -527,6 +546,11 @@ class HeavenScroll {
         let scrollDirection = this.scrollControll();
         let pastTriggerPosition = (pageTopPosition - pageBottomPosition) <= screenTrigger;
         let pageLoadRestrictionParam = pageNumber > 1;
+
+        if (this.scrollValue === 0) {
+            this.resetPagesView();
+            return;
+        }
         
         if (scrollDirection === 'down') {
             pageTopPosition = Math.abs(pages[(pages.length - 1)].getBoundingClientRect().top);
