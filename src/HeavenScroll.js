@@ -193,8 +193,8 @@ class HeavenScroll {
             this.loadPageFunction(args, (html) => {
                 let realHtml;
                 
-                // check if this.wrapHtmlPage() is called in implemented (by 'user') function
-                if (typeof html === 'undefined' || !html) {
+                // check if this.wrapHtmlPage() is called in callback function on client side
+                if (!html) {
                     realHtml = this.wrapHtmlPage(`<p class="errorLoadingPageMessage">Error Loading Page</p>`, args);
                 } else if (html.match(this.options.pageClassName)) {
                     realHtml = html;
@@ -202,6 +202,7 @@ class HeavenScroll {
                     realHtml = this.wrapHtmlPage(html, args);   
                 }
 
+                // initialize values from url parameters
                 if (position === 'iniHeaven') {
                     $(realHtml).hide().prependTo(this.$el).fadeIn(this.options.fadeInValue);
                     
