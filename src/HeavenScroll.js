@@ -127,6 +127,15 @@ class HeavenScroll {
         this.$el.css('position', 'relative');
     }
 
+    updateCurrentPageValue(pageValue) {
+        if ((pageValue > 1) && (pageValue <= this.options.endPage)) {
+            this.urlStartPage = pageValue;
+        } else if ((pageValue > 1) && (pageValue > this.options.endPage)){
+            this.urlStartPage = this.options.endPage;
+        }
+        this.currentPage = this.urlStartPage;
+    }
+
     urlHasStartPageInfo() {
         this.urlParams = $(location)
             .attr('href')
@@ -144,12 +153,7 @@ class HeavenScroll {
 
                     if (arg.indexOf(this.options.urlQueryParamName) !== -1) {
                         pageValue = parseInt(arg.split('=')[1], 10);
-                        if ((pageValue > 1) && (pageValue <= this.options.endPage)) {
-                            this.urlStartPage = parseInt(arg.split('=')[1], 10);
-                        } else if ((pageValue > 1) && (pageValue > this.options.endPage)){
-                            this.urlStartPage = this.options.endPage;
-                        }
-                        this.currentPage = this.urlStartPage;
+                        this.updateCurrentPageValue(pageValue);
                         return;
                     }
                 });
