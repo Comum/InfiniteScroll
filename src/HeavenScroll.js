@@ -127,10 +127,15 @@ class HeavenScroll {
         this.$el.css('position', 'relative');
     }
 
-    updateCurrentPageValue(pageValue) {
-        if ((pageValue > 1) && (pageValue <= this.options.endPage)) {
-            this.urlStartPage = pageValue;
-        } else if ((pageValue > 1) && (pageValue > this.options.endPage)){
+    /**
+     * Updates the current page value
+     * 
+     * @param {Integer} pageNumber 
+     */
+    updateCurrentPageValue(pageNumber) {
+        if ((pageNumber > 1) && (pageNumber <= this.options.endPage)) {
+            this.urlStartPage = pageNumber;
+        } else if ((pageNumber > 1) && (pageNumber > this.options.endPage)){
             this.urlStartPage = this.options.endPage;
         }
         this.currentPage = this.urlStartPage;
