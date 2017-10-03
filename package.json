@@ -1,7 +1,7 @@
 {
   "name": "jquery-heaven-scroll",
   "version": "3.4.1",
-  "description": " Heaven scroll provides an InfinateScroll with amazing performance and experiance improvements",
+  "description": " Heaven scroll provides an InfiniteScroll with amazing performance and experiance improvements",
   "main": "dist/module.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
