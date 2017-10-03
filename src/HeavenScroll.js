@@ -547,12 +547,13 @@ class HeavenScroll {
         // default scroll top value
         const screenTrigger = screenHeight - 50;
         let pages = document.getElementsByClassName('js-page-hook');
-        let pageNumber = parseInt(pages[0].getAttribute('data-page-number'));
+        let firstPageNumber = parseInt(pages[0].getAttribute('data-page-number'));
+        let lastPageNumber = parseInt(pages[pages.length - 1].getAttribute('data-page-number'));
         let pageTopPosition = Math.abs(pages[0].getBoundingClientRect().top);
         let pageBottomPosition = Math.abs(pages[0].getBoundingClientRect().bottom);
         let scrollDirection = this.scrollControll();
         let pastTriggerPosition = (pageTopPosition - pageBottomPosition) <= screenTrigger;
-        let pageLoadRestrictionParam = pageNumber > 1;
+        let pageLoadRestrictionParam = firstPageNumber > 1;
 
         if (this.scrollValue === 0) {
             this.resetPagesView();
@@ -560,11 +561,15 @@ class HeavenScroll {
         }
         
         if (scrollDirection === 'down') {
+            if (lastPageNumber === this.options.endPage) {
+                return;
+            }
+
             pageTopPosition = Math.abs(pages[(pages.length - 1)].getBoundingClientRect().top);
             pageBottomPosition = Math.abs(pages[(pages.length - 1)].getBoundingClientRect().bottom);
             pastTriggerPosition = (pageBottomPosition - pageTopPosition) <= screenTrigger;
             pageLoadRestrictionParam = this.currentPage < this.options.endPage;
-            pageNumber = parseInt(pages[(pages.length - 1)].getAttribute('data-page-number')) + 1;
+            firstPageNumber = parseInt(pages[(pages.length - 1)].getAttribute('data-page-number')) + 1;
         }
 
         this.updateUrlStartPageParam(scrollDirection);
@@ -580,10 +585,10 @@ class HeavenScroll {
 
         $htmlBody.attr('data-processing', '1');
 
-        this.loadingPage(scrollDirection, pageNumber)
+        this.loadingPage(scrollDirection, firstPageNumber)
         .catch(() => {
             if (this.options.debugMode) {
-                this.errorMsg('loadingPage(scrollDir, pageNumber): "' + scrollDirection + '" is not a valid argument.');
+                this.errorMsg('loadingPage(scrollDir, firstPageNumber): "' + scrollDirection + '" is not a valid argument.');
             }
         })
         .finally(() => {
