@@ -594,7 +594,7 @@ class HeavenScroll {
      */
     errorMsg(error) {
         if (this.options.debugMode) {
-            console.error(string);
+            console.error(error);
         }
     }
 }
