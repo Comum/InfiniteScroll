@@ -2,6 +2,7 @@
 /**
  * Heaven Scroll
  */
+
 var defaultOptions = {
     fadeInValue: 1500,
     pageHeight: -1,
@@ -19,6 +20,10 @@ const $window = $(window);
 const $document = $(document);
 const $htmlBody = $('html, body');
 const screenHeight = $window.height();
+
+if (!window.Promise) {
+    window.Promise = require('es6-promise').Promise;
+}
 
 class HeavenScroll {
     /*
