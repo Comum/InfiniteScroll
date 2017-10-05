@@ -141,7 +141,8 @@ class HeavenScroll {
         if ((pageNumber > 1) && (pageNumber <= this.options.endPage)) {
             this.urlStartPage = pageNumber;
         } else if ((pageNumber > 1) && (pageNumber > this.options.endPage)){
-            this.urlStartPage = this.options.endPage;
+            this.urlStartPage = 1;
+            this.urlQueryParamValueUpdate(1);
         }
         this.currentPage = this.urlStartPage;
     }
