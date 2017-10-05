@@ -36,7 +36,6 @@
     "bootstrap-sass": "3.3.7",
     "copy-webpack-plugin": "4.0.1",
     "css-loader": "0.26.1",
-    "es6-promise": "^4.1.1",
     "eslint": "3.19.0",
     "eslint-loader": "1.7.1",
     "extract-text-webpack-plugin": "2.0.0-rc.3",
