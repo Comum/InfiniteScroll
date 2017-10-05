@@ -21,10 +21,6 @@ const $document = $(document);
 const $htmlBody = $('html, body');
 const screenHeight = $window.height();
 
-if (!window.Promise) {
-    window.Promise = require('es6-promise').Promise;
-}
-
 class HeavenScroll {
     /*
      * Initializes the plugin
