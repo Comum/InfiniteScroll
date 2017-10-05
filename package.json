@@ -1,6 +1,6 @@
 {
   "name": "jquery-heaven-scroll",
-  "version": "3.4.1",
+  "version": "3.4.2",
   "description": " Heaven scroll provides an InfiniteScroll with amazing performance and experiance improvements",
   "main": "dist/module.js",
   "scripts": {
@@ -36,6 +36,7 @@
     "bootstrap-sass": "3.3.7",
     "copy-webpack-plugin": "4.0.1",
     "css-loader": "0.26.1",
+    "es6-promise": "^4.1.1",
     "eslint": "3.19.0",
     "eslint-loader": "1.7.1",
     "extract-text-webpack-plugin": "2.0.0-rc.3",

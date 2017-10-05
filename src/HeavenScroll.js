@@ -2,6 +2,7 @@
 /**
  * Heaven Scroll
  */
+
 var defaultOptions = {
     fadeInValue: 1500,
     pageHeight: -1,
@@ -19,6 +20,10 @@ const $window = $(window);
 const $document = $(document);
 const $htmlBody = $('html, body');
 const screenHeight = $window.height();
+
+if (!window.Promise) {
+    window.Promise = require('es6-promise').Promise;
+}
 
 class HeavenScroll {
     /*
@@ -136,7 +141,8 @@ class HeavenScroll {
         if ((pageNumber > 1) && (pageNumber <= this.options.endPage)) {
             this.urlStartPage = pageNumber;
         } else if ((pageNumber > 1) && (pageNumber > this.options.endPage)){
-            this.urlStartPage = this.options.endPage;
+            this.urlStartPage = 1;
+            this.urlQueryParamValueUpdate(1);
         }
         this.currentPage = this.urlStartPage;
     }
