@@ -13,7 +13,8 @@ var defaultOptions = {
     urlQueryParamName: -1,
     loadPageFunction: function () {},
     spinnerClassName: 'Spinner',
-    debugMode: false
+    debugMode: false,
+    eraseMode: ''
 };
 
 const $window = $(window);
@@ -36,8 +37,8 @@ class HeavenScroll {
      * @param {Integer} options.urlQueryParamName
      * @param {Function} options.loadPageFunction
      * @param {String} options.spinnerClassName
-     * @param {Integer} options.throttleValue
      * @param {Boolean} options.debugMode
+     * @param {String} options.eraseMode
      */
     constructor(el, options) {
         this.el = el;
@@ -109,11 +110,11 @@ class HeavenScroll {
             }
         }
 
-        if (this.options.throttleValue === -1) {
-            if (this.$el.data('throttleValue')) {
-                this.options.throttleValue = this.$el.data('throttleValue');
+        if (this.options.eraseMode === '') {
+            if (this.$el.data('eraseMode')) {
+                this.options.eraseMode = this.$el.data('eraseMode');
             } else {
-                this.options.throttleValue = 100;
+                this.options.eraseMode = 'hide';
             }
         }
 
