@@ -109,6 +109,10 @@ class HeavenScroll {
             }
         }
 
+        if (this.$el.data('eraseMode')) {
+            this.options.eraseMode = this.$el.data('eraseMode');
+        }
+
         this.isPageLoading = false;
         this.urlStartPage = 1;
         this.currentPage = 1;
