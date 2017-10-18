@@ -344,11 +344,25 @@ class HeavenScroll {
     }
 
     /**
-     * Removes the first or last page
+     * Handles what to do with previous functions
+     * 
+     * @param {String} position 
+     */
+    notVisibilePageHandler(position) {
+        if (this.options.eraseMode === 'hide') {
+            this.hidePage(position);
+        } else if (this.options.eraseMode === 'erase') {
+            this.removePage(position);
+        }
+
+    }
+
+    /**
+     * Hides the first or last page
      *
      * @param {String} position
      */
-    removePage(position) {
+    hidePage(position) {
         let className = 'visibility-hidden';
 
         if ((position !== 'first') && (position !== 'last')) {
@@ -366,6 +380,32 @@ class HeavenScroll {
             .find('.js-page-hook:' + position)
             .addClass(className)
             .removeClass('js-page-hook');
+    }
+
+    /**
+     * Removes the first or last page
+     * 
+     * @param {String} position 
+     */
+    removePage(position) {
+        let pageHeight;
+        let html;
+        let $page;
+         
+        if ((position !== 'first') && (position !== 'last')) {
+            console.error('removePage(position): "' + position + '" is not a valid argument.');
+        } else {
+            if (position === 'first') {
+                $page = this.$el.find('.' + this.options.pageClassName + ':first');
+                pageHeight = $page.height();
+                html = `<div class="beforePlaceHolderDiv" style="width: 100%; height: ${pageHeight}px; position: relative;"></div>`;
+            } else if (position === 'last') {
+                $page = this.$el.find('.' + this.options.pageClassName + ':last');
+                pageHeight = $page.height();
+                html = `<div class="afterPlaceHolderDiv" style="width: 100%; height: ${pageHeight}px; position: relative;"></div>`;
+            }
+            $page.replaceWith(html);
+        }
     }
 
     replaceQueryParam(param, newval, search) {
@@ -509,7 +549,7 @@ class HeavenScroll {
         })
         .then(() => {
             if (pagesLength >= this.options.maxPagesNumber) {
-                this.removePage(removePagePositon);
+                this.notVisibilePageHandler(removePagePositon);
             }
         })
         .then(() => {

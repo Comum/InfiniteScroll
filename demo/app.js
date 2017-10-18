@@ -61,6 +61,6 @@ $(document).ready(function () {
         loadPageFunction: productTileFetcher,
         spinnerClassName: 'Spinner',
         debugMode: false,
-        eraseMode: 'hide' 
+        eraseMode: 'erase' 
     });
 });
