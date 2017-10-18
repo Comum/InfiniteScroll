@@ -14,7 +14,7 @@ var defaultOptions = {
     loadPageFunction: function () {},
     spinnerClassName: 'Spinner',
     debugMode: false,
-    eraseMode: ''
+    eraseMode: 'hide'
 };
 
 const $window = $(window);
@@ -106,14 +106,6 @@ class HeavenScroll {
                 this.options.urlQueryParamName = this.$el.data('urlQueryParamName');
             } else {
                 this.options.urlQueryParamName = 'startPage';
-            }
-        }
-
-        if (this.options.eraseMode === '') {
-            if (this.$el.data('eraseMode')) {
-                this.options.eraseMode = this.$el.data('eraseMode');
-            } else {
-                this.options.eraseMode = 'hide';
             }
         }
 
@@ -347,7 +339,7 @@ class HeavenScroll {
      * 
      * @param {String} position 
      */
-    notVisibilePageHandler(position) {
+    eraseModeHandler(position) {
         if (this.options.eraseMode === 'hide') {
             this.hidePage(position);
         } else if (this.options.eraseMode === 'erase') {
@@ -548,7 +540,7 @@ class HeavenScroll {
         })
         .then(() => {
             if (pagesLength >= this.options.maxPagesNumber) {
-                this.notVisibilePageHandler(removePagePositon);
+                this.eraseModeHandler(removePagePositon);
             }
         })
         .then(() => {
