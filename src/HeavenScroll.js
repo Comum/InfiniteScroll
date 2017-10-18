@@ -13,7 +13,8 @@ var defaultOptions = {
     urlQueryParamName: -1,
     loadPageFunction: function () {},
     spinnerClassName: 'Spinner',
-    debugMode: false
+    debugMode: false,
+    eraseMode: ''
 };
 
 const $window = $(window);
@@ -36,8 +37,8 @@ class HeavenScroll {
      * @param {Integer} options.urlQueryParamName
      * @param {Function} options.loadPageFunction
      * @param {String} options.spinnerClassName
-     * @param {Integer} options.throttleValue
      * @param {Boolean} options.debugMode
+     * @param {String} options.eraseMode
      */
     constructor(el, options) {
         this.el = el;
@@ -47,7 +48,6 @@ class HeavenScroll {
         this.init();
         this.urlHasStartPageInfo();
 
-        this.updateUrlStartPageParam('');
         this.initHeavenScroll();
         $window.on('scroll', this.onScroll.bind(this));
     }
@@ -109,11 +109,11 @@ class HeavenScroll {
             }
         }
 
-        if (this.options.throttleValue === -1) {
-            if (this.$el.data('throttleValue')) {
-                this.options.throttleValue = this.$el.data('throttleValue');
+        if (this.options.eraseMode === '') {
+            if (this.$el.data('eraseMode')) {
+                this.options.eraseMode = this.$el.data('eraseMode');
             } else {
-                this.options.throttleValue = 100;
+                this.options.eraseMode = 'hide';
             }
         }
 
@@ -343,11 +343,25 @@ class HeavenScroll {
     }
 
     /**
-     * Removes the first or last page
+     * Handles what to do with previous functions
+     * 
+     * @param {String} position 
+     */
+    notVisibilePageHandler(position) {
+        if (this.options.eraseMode === 'hide') {
+            this.hidePage(position);
+        } else if (this.options.eraseMode === 'erase') {
+            this.removePage(position);
+        }
+
+    }
+
+    /**
+     * Hides the first or last page
      *
      * @param {String} position
      */
-    removePage(position) {
+    hidePage(position) {
         let className = 'visibility-hidden';
 
         if ((position !== 'first') && (position !== 'last')) {
@@ -365,6 +379,32 @@ class HeavenScroll {
             .find('.js-page-hook:' + position)
             .addClass(className)
             .removeClass('js-page-hook');
+    }
+
+    /**
+     * Removes the first or last page
+     * 
+     * @param {String} position 
+     */
+    removePage(position) {
+        let pageHeight;
+        let html;
+        let $page;
+         
+        if ((position !== 'first') && (position !== 'last')) {
+            this.errorMsg('removePage(position): "' + position + '" is not a valid argument.');
+        } else {
+            if (position === 'first') {
+                $page = this.$el.find('.' + this.options.pageClassName + ':first');
+                pageHeight = $page.height();
+                html = `<div class="beforePlaceHolderDiv" style="width: 100%; height: ${pageHeight}px; position: relative;"></div>`;
+            } else if (position === 'last') {
+                $page = this.$el.find('.' + this.options.pageClassName + ':last');
+                pageHeight = $page.height();
+                html = `<div class="afterPlaceHolderDiv" style="width: 100%; height: ${pageHeight}px; position: relative;"></div>`;
+            }
+            $page.replaceWith(html);
+        }
     }
 
     replaceQueryParam(param, newval, search) {
@@ -508,7 +548,7 @@ class HeavenScroll {
         })
         .then(() => {
             if (pagesLength >= this.options.maxPagesNumber) {
-                this.removePage(removePagePositon);
+                this.notVisibilePageHandler(removePagePositon);
             }
         })
         .then(() => {
@@ -562,6 +602,8 @@ class HeavenScroll {
         let pastTriggerPosition = (pageTopPosition - pageBottomPosition) <= screenTrigger;
         let pageLoadRestrictionParam = firstPageNumber > 1;
 
+        this.updateUrlStartPageParam(scrollDirection);
+
         if (this.scrollValue === 0) {
             this.resetPagesView();
             return;
@@ -579,7 +621,6 @@ class HeavenScroll {
             firstPageNumber = parseInt(pages[(pages.length - 1)].getAttribute('data-page-number')) + 1;
         }
 
-        this.updateUrlStartPageParam(scrollDirection);
         this.prevScroll = this.scrollValue;
 
         if ($htmlBody.attr('data-processing')) {
