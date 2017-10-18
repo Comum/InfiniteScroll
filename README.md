@@ -71,7 +71,8 @@ $pagesContainer.heavenScroll({
 		urlQueryParamName: 'startPage', // page to start url query parameter name
 		loadPageFunction: productTileFetcher,  // function that returns the html to be shown
 		spinnerClassName: 'Spinner', // default class name 'Spinner'
-		debugMode: true // enable debugMode for loading a page information, it's default value is `false`
+		debugMode: true // enable debugMode for loading a page information, it's default value is `false`,
+        eraseMode: 'hide' // enable `hide` mode or `erase` mode regarding previous loaded pages in the infinity scroll
     });
 ```
 
@@ -88,7 +89,8 @@ Another way to send this information is by using data-attributes in the `$pagesC
 	 data-start-page="1"
 	 data-end-page="10"
 	 data-page-class-name="pageSingle"
-	 data-url-query-param-name="startPage">
+	 data-url-query-param-name="startPage"
+	 data-erase-mode="hide">
 </div>
 ```
 

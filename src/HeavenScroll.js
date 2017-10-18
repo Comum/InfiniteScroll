@@ -48,7 +48,6 @@ class HeavenScroll {
         this.init();
         this.urlHasStartPageInfo();
 
-        this.updateUrlStartPageParam('');
         this.initHeavenScroll();
         $window.on('scroll', this.onScroll.bind(this));
     }
@@ -393,7 +392,7 @@ class HeavenScroll {
         let $page;
          
         if ((position !== 'first') && (position !== 'last')) {
-            console.error('removePage(position): "' + position + '" is not a valid argument.');
+            this.errorMsg('removePage(position): "' + position + '" is not a valid argument.');
         } else {
             if (position === 'first') {
                 $page = this.$el.find('.' + this.options.pageClassName + ':first');
@@ -603,6 +602,8 @@ class HeavenScroll {
         let pastTriggerPosition = (pageTopPosition - pageBottomPosition) <= screenTrigger;
         let pageLoadRestrictionParam = firstPageNumber > 1;
 
+        this.updateUrlStartPageParam(scrollDirection);
+
         if (this.scrollValue === 0) {
             this.resetPagesView();
             return;
@@ -620,7 +621,6 @@ class HeavenScroll {
             firstPageNumber = parseInt(pages[(pages.length - 1)].getAttribute('data-page-number')) + 1;
         }
 
-        this.updateUrlStartPageParam(scrollDirection);
         this.prevScroll = this.scrollValue;
 
         if ($htmlBody.attr('data-processing')) {
